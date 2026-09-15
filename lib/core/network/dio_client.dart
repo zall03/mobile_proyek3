@@ -8,7 +8,7 @@ class DioClient {
   DioClient(this.secureStorage)
     : dio = Dio(
         BaseOptions(
-          baseUrl: 'http://10.0.2.2:8000/api', // Laragon via Android emulator
+          baseUrl: 'http://127.0.0.1:8000/api', // Laragon via Android emulator
           connectTimeout: const Duration(seconds: 10),
         ),
       ) {
