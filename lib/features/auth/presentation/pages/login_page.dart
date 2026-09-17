@@ -101,7 +101,7 @@ class _LoginPageState extends State<LoginPage> {
                                   color: Colors.white,
                                   width: 3,
                                 ),
-                                color: AppColors.primaryLight.withOpacity(0.35),
+                                color: AppColors.primaryLight.withValues(alpha: 0.35),
                                 boxShadow: const [
                                   BoxShadow(
                                     color: Color(0x1A000000),

@@ -64,6 +64,18 @@ class AuthRemoteDatasource {
     }
   }
 
+  Future<Map<String, dynamic>> googleSignIn({required String idToken}) async {
+    try {
+      final response = await dio.post(
+        '/auth/google',
+        data: {'id_token': idToken},
+      );
+      return response.data['data'];
+    } on DioException catch (e) {
+      throw ServerException(_extractMessage(e));
+    }
+  }
+
   String _extractMessage(DioException e) {
     final data = e.response?.data;
     if (data is Map && data['message'] != null)

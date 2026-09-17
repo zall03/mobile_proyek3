@@ -136,7 +136,7 @@ class _SegmentedLoader extends StatelessWidget {
               final segmentProgress = (controller.value * segments - index)
                   .clamp(0.0, 1.0);
               final color = Color.lerp(
-                AppColors.primaryLight.withOpacity(0.25),
+                AppColors.primaryLight.withValues(alpha: 0.25),
                 AppColors.primaryDark,
                 segmentProgress,
               );

@@ -79,6 +79,18 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, User>> googleSignIn({required String idToken}) async {
+    try {
+      final result = await remoteDatasource.googleSignIn(idToken: idToken);
+      final user = UserModel.fromJson(result['user']);
+      await secureStorage.write(key: 'auth_token', value: result['token']);
+      return Right(user);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    }
+  }
+
+  @override
   Future<void> logout() async {
     await secureStorage.delete(key: 'auth_token');
   }

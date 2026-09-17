@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "315970193485",
+    "project_id": "dapur-cerdas-e84bc",
+    "storage_bucket": "dapur-cerdas-e84bc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:315970193485:android:b0fc94949bb8c46315f404",
+        "android_client_info": {
+          "package_name": "com.example.project3"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "315970193485-uq5leg3bfqbj96evgpv5g3renq9k11vg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWXSDlZVgJQsnDTryFIQ2eepqU4DTA4PM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "315970193485-2899amsa12rolrsv3t24ldf9lpppeo28.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

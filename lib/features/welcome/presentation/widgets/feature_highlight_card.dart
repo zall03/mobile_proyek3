@@ -35,7 +35,7 @@ class FeatureHighlightCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppColors.primaryDark.withOpacity(0.08),
+              color: AppColors.primaryDark.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: AppColors.primaryDark, size: 20),
@@ -63,7 +63,7 @@ class FeatureHighlightCard extends StatelessWidget {
                         vertical: 3,
                       ),
                       decoration: BoxDecoration(
-                        color: badgeColor.withOpacity(0.15),
+                        color: badgeColor.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(

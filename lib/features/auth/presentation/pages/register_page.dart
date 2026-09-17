@@ -4,9 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../injection_container.dart';
+import '../../../../core/services/google_auth_service.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../home/presentation/pages/home_page.dart';
 import 'login_page.dart';
 import 'otp_verification_page.dart';
 
@@ -45,6 +47,22 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
+  Future<void> _handleGoogleSignIn(BuildContext ctx) async {
+    try {
+      final idToken = await sl<GoogleAuthService>().getIdToken();
+      if (!ctx.mounted) return;
+      ctx.read<AuthCubit>().googleSignIn(idToken: idToken);
+    } catch (e) {
+      if (!ctx.mounted) return;
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(
+          content: Text('Gagal masuk dengan Google: $e'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -57,6 +75,11 @@ class _RegisterPageState extends State<RegisterPage> {
               MaterialPageRoute(
                 builder: (_) => OtpVerificationPage(email: state.email),
               ),
+            );
+          } else if (state is AuthSuccess) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const HomePage()),
             );
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -284,8 +307,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton(
-                          onPressed:
-                              () {}, // TODO: integrasi Google Sign-In (Fase 2+)
+                          onPressed: isLoading
+                              ? null
+                              : () => _handleGoogleSignIn(context),
                           style: OutlinedButton.styleFrom(
                             backgroundColor: Colors.white,
                             side: BorderSide(color: Colors.grey.shade300),

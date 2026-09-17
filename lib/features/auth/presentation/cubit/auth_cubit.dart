@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../domain/usecases/google_sign_in_usecase.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
 import '../../domain/usecases/resend_otp_usecase.dart';
@@ -11,12 +12,14 @@ class AuthCubit extends Cubit<AuthState> {
   final RegisterUsecase registerUsecase;
   final VerifyRegisterOtpUsecase verifyOtpUsecase;
   final ResendOtpUsecase resendOtpUsecase;
+  final GoogleSignInUsecase googleSignInUsecase;
 
   AuthCubit({
     required this.loginUsecase,
     required this.registerUsecase,
     required this.verifyOtpUsecase,
     required this.resendOtpUsecase,
+    required this.googleSignInUsecase,
   }) : super(AuthInitial());
 
   Future<void> login({required String email, required String password}) async {
@@ -63,6 +66,15 @@ class AuthCubit extends Cubit<AuthState> {
     result.fold(
       (failure) => emit(AuthFailure(failure.message)),
       (_) => emit(const OtpResent()),
+    );
+  }
+
+  Future<void> googleSignIn({required String idToken}) async {
+    emit(AuthLoading());
+    final result = await googleSignInUsecase(idToken: idToken);
+    result.fold(
+      (failure) => emit(AuthFailure(failure.message)),
+      (user) => emit(AuthSuccess(user)),
     );
   }
 }
