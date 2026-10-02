@@ -76,6 +76,48 @@ class AuthRemoteDatasource {
     }
   }
 
+  Future<Map<String, dynamic>> me() async {
+    try {
+      final response = await dio.get('/me');
+      return response.data['data'] as Map<String, dynamic>;
+    } on DioException catch (e) {
+      throw ServerException(_extractMessage(e));
+    }
+  }
+
+  Future<Map<String, dynamic>> updateMe({required String name}) async {
+    try {
+      final response = await dio.put('/me', data: {'name': name});
+      return response.data['data'] as Map<String, dynamic>;
+    } on DioException catch (e) {
+      throw ServerException(_extractMessage(e));
+    }
+  }
+
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String newPasswordConfirmation,
+  }) async {
+    try {
+      await dio.post('/change-password', data: {
+        'current_password': currentPassword,
+        'new_password': newPassword,
+        'new_password_confirmation': newPasswordConfirmation,
+      });
+    } on DioException catch (e) {
+      throw ServerException(_extractMessage(e));
+    }
+  }
+
+  Future<void> logout() async {
+    try {
+      await dio.post('/logout');
+    } on DioException catch (e) {
+      throw ServerException(_extractMessage(e));
+    }
+  }
+
   String _extractMessage(DioException e) {
     final data = e.response?.data;
     if (data is Map && data['message'] != null)

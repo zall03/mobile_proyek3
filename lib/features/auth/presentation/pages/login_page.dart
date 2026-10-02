@@ -47,9 +47,12 @@ class _LoginPageState extends State<LoginPage> {
       child: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            Navigator.pushReplacement(
+            Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (_) => const HomePage()),
+              MaterialPageRoute(
+                builder: (_) => HomePage(userName: state.user.name),
+              ),
+              (_) => false,
             );
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -101,7 +104,9 @@ class _LoginPageState extends State<LoginPage> {
                                   color: Colors.white,
                                   width: 3,
                                 ),
-                                color: AppColors.primaryLight.withValues(alpha: 0.35),
+                                color: AppColors.primaryLight.withValues(
+                                  alpha: 0.35,
+                                ),
                                 boxShadow: const [
                                   BoxShadow(
                                     color: Color(0x1A000000),
@@ -110,9 +115,9 @@ class _LoginPageState extends State<LoginPage> {
                                 ],
                               ),
                               child: const Icon(
-                                Icons.family_restroom,
-                                color: Colors.white,
-                                size: 36,
+                                Icons.person,
+                                size: 48,
+                                color: AppColors.primaryDark,
                               ),
                             ),
                             Positioned(
@@ -120,14 +125,6 @@ class _LoginPageState extends State<LoginPage> {
                               right: -2,
                               child: Container(
                                 padding: const EdgeInsets.all(6),
-                                decoration: const BoxDecoration(
-                                  color: AppColors.accentOrange,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Text(
-                                  '👋',
-                                  style: TextStyle(fontSize: 14),
-                                ),
                               ),
                             ),
                           ],
@@ -136,7 +133,7 @@ class _LoginPageState extends State<LoginPage> {
                       const SizedBox(height: 14),
                       Center(
                         child: Text(
-                          'Selamat Datang Kembali, Bunda! 👋',
+                          'Selamat Datang Kembali, Bunda!',
                           style: GoogleFonts.poppins(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
@@ -321,11 +318,6 @@ class _LoginPageState extends State<LoginPage> {
                                                 fontSize: 14,
                                               ),
                                             ),
-                                            const SizedBox(width: 6),
-                                            const Icon(
-                                              Icons.arrow_forward,
-                                              size: 18,
-                                            ),
                                           ],
                                         ),
                                 ),
@@ -345,7 +337,7 @@ class _LoginPageState extends State<LoginPage> {
                             children: [
                               const TextSpan(text: 'Belum punya akun Bunda? '),
                               TextSpan(
-                                text: 'Daftar Sekarang ↗',
+                                text: 'Daftar Sekarang ',
                                 style: GoogleFonts.poppins(
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.primaryDark,

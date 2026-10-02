@@ -8,8 +8,11 @@ class DioClient {
   DioClient(this.secureStorage)
     : dio = Dio(
         BaseOptions(
-          baseUrl: 'http://127.0.0.1:8000/api', // Laragon via Android emulator
-          connectTimeout: const Duration(seconds: 10),
+          baseUrl:
+              'http://10.0.172.199:8000/api', // Laragon via Android emulator
+          connectTimeout: const Duration(seconds: 60),
+          receiveTimeout: const Duration(seconds: 120),
+          headers: {'Accept': 'application/json'},
         ),
       ) {
     dio.interceptors.add(

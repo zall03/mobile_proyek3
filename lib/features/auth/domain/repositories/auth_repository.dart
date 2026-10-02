@@ -19,5 +19,12 @@ abstract class AuthRepository {
   });
   Future<Either<Failure, String>> resendOtp({required String email});
   Future<Either<Failure, User>> googleSignIn({required String idToken});
+  Future<Either<Failure, User>> getMe();
+  Future<Either<Failure, User>> updateMe({required String name});
+  Future<Either<Failure, void>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String newPasswordConfirmation,
+  });
   Future<void> logout();
 }

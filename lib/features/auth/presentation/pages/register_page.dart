@@ -77,9 +77,12 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             );
           } else if (state is AuthSuccess) {
-            Navigator.pushReplacement(
+            Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (_) => const HomePage()),
+              MaterialPageRoute(
+                builder: (_) => HomePage(userName: state.user.name),
+              ),
+              (_) => false,
             );
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -273,11 +276,6 @@ class _RegisterPageState extends State<RegisterPage> {
                                               fontSize: 13.5,
                                             ),
                                           ),
-                                          const SizedBox(width: 6),
-                                          const Icon(
-                                            Icons.arrow_forward,
-                                            size: 18,
-                                          ),
                                         ],
                                       ),
                               ),
@@ -373,7 +371,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       const SizedBox(height: 8),
                       Center(
                         child: Text(
-                          '🔒 Data privasi keluarga terlindungi & terenkripsi aman',
+                          'Data privasi keluarga terlindungi & terenkripsi aman',
                           style: GoogleFonts.poppins(
                             fontSize: 10.5,
                             color: AppColors.textGrey,
