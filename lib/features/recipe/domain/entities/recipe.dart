@@ -6,6 +6,7 @@ class RecipeIngredient extends Equatable {
   final double quantityNeeded;
   final String unit;
   final String? imageUrl;
+  final bool inStock;
 
   const RecipeIngredient({
     required this.ingredientId,
@@ -13,10 +14,18 @@ class RecipeIngredient extends Equatable {
     required this.quantityNeeded,
     required this.unit,
     this.imageUrl,
+    this.inStock = false,
   });
 
   @override
-  List<Object?> get props => [ingredientId, ingredientName, quantityNeeded, unit, imageUrl];
+  List<Object?> get props => [
+    ingredientId,
+    ingredientName,
+    quantityNeeded,
+    unit,
+    imageUrl,
+    inStock,
+  ];
 }
 
 class Recipe extends Equatable {
@@ -25,6 +34,7 @@ class Recipe extends Equatable {
   final String description;
   final String instructions;
   final int cookTimeMinutes;
+  final int servings;
   final String source;
   final List<RecipeIngredient> ingredients;
 
@@ -34,10 +44,20 @@ class Recipe extends Equatable {
     required this.description,
     required this.instructions,
     required this.cookTimeMinutes,
+    required this.servings,
     required this.source,
     required this.ingredients,
   });
 
   @override
-  List<Object?> get props => [id, name, description, instructions, cookTimeMinutes, source, ingredients];
+  List<Object?> get props => [
+    id,
+    name,
+    description,
+    instructions,
+    cookTimeMinutes,
+    servings,
+    source,
+    ingredients,
+  ];
 }

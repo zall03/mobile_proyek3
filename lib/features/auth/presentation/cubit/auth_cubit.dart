@@ -44,7 +44,9 @@ class AuthCubit extends Cubit<AuthState> {
     );
     result.fold(
       (failure) => emit(AuthFailure(failure.message)),
-      (sentEmail) => emit(OtpSent(sentEmail)),
+      (outcome) => outcome.needsVerification
+          ? emit(OtpSent(outcome.email))
+          : emit(AuthSuccess(outcome.user!)),
     );
   }
 
@@ -69,12 +71,13 @@ class AuthCubit extends Cubit<AuthState> {
     );
   }
 
-  Future<void> googleSignIn({required String idToken}) async {
+  Future<void> googleSignIn() async {
     emit(AuthLoading());
-    final result = await googleSignInUsecase(idToken: idToken);
+    final result = await googleSignInUsecase();
     result.fold(
       (failure) => emit(AuthFailure(failure.message)),
-      (user) => emit(AuthSuccess(user)),
+      // null: halaman dialihkan ke Google, sesi menunggu setelah redirect.
+      (user) => user == null ? emit(AuthInitial()) : emit(AuthSuccess(user)),
     );
   }
 }

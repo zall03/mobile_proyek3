@@ -32,9 +32,17 @@ class RecipeCubit extends Cubit<RecipeState> {
     );
   }
 
-  Future<void> generateRecipe(List<int> ingredientIds) async {
+  Future<void> generateRecipe(
+    List<int> ingredientIds, {
+    String? forWhom,
+    List<String>? restrictions,
+  }) async {
     emit(RecipeGenerating());
-    final result = await generateRecipeUsecase(ingredientIds);
+    final result = await generateRecipeUsecase(
+      ingredientIds,
+      forWhom: forWhom,
+      restrictions: restrictions,
+    );
     result.fold(
       (failure) => emit(RecipeFailure(failure.message)),
       (recipe) => emit(RecipeDetail(recipe)),

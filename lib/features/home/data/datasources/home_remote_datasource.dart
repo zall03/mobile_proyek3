@@ -8,8 +8,12 @@ class HomeRemoteDatasource {
 
   Future<DashboardSummary> getDashboardSummary() async {
     final allStocksResult = await stockRepository.getStocks();
-    final expiringStocksResult = await stockRepository.getStocks(status: 'expiring');
-    final expiredStocksResult = await stockRepository.getStocks(status: 'expired');
+    final expiringStocksResult = await stockRepository.getStocks(
+      status: 'expiring',
+    );
+    final expiredStocksResult = await stockRepository.getStocks(
+      status: 'expired',
+    );
 
     return allStocksResult.fold(
       (failure) => throw Exception(failure.message),

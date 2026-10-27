@@ -11,7 +11,9 @@ class RecipeRemoteDatasource {
     try {
       final response = await dio.get('/recipes');
       final list = response.data['data'] as List<dynamic>;
-      return list.map((r) => RecipeModel.fromJson(r as Map<String, dynamic>)).toList();
+      return list
+          .map((r) => RecipeModel.fromJson(r as Map<String, dynamic>))
+          .toList();
     } on DioException catch (e) {
       throw Exception(_messageFrom(e));
     } catch (e) {
@@ -22,7 +24,9 @@ class RecipeRemoteDatasource {
   Future<RecipeModel> getRecipeById(int id) async {
     try {
       final response = await dio.get('/recipes/$id');
-      return RecipeModel.fromJson(response.data['data'] as Map<String, dynamic>);
+      return RecipeModel.fromJson(
+        response.data['data'] as Map<String, dynamic>,
+      );
     } on DioException catch (e) {
       throw Exception(_messageFrom(e));
     } catch (e) {
@@ -30,12 +34,26 @@ class RecipeRemoteDatasource {
     }
   }
 
-  Future<RecipeModel> generateRecipe(List<int> ingredientIds) async {
+  Future<RecipeModel> generateRecipe(
+    List<int> ingredientIds, {
+    String? forWhom,
+    List<String>? restrictions,
+  }) async {
     try {
-      final response = await dio.post('/recipes/generate', data: {
-        'ingredient_ids': ingredientIds,
-      });
-      return RecipeModel.fromJson(response.data['data'] as Map<String, dynamic>);
+      final data = <String, dynamic>{'ingredient_ids': ingredientIds};
+      if (forWhom != null && forWhom.isNotEmpty) {
+        data['for_whom'] = forWhom;
+      }
+      if (restrictions != null && restrictions.isNotEmpty) {
+        data['restrictions'] = restrictions;
+      }
+      final response = await dio.post(
+        '/recipes/generate',
+        data: data,
+      );
+      return RecipeModel.fromJson(
+        response.data['data'] as Map<String, dynamic>,
+      );
     } on DioException catch (e) {
       throw Exception(_messageFrom(e));
     } catch (e) {
@@ -44,11 +62,14 @@ class RecipeRemoteDatasource {
   }
 
   String _messageFrom(DioException e) {
-    if (e.type == DioExceptionType.receiveTimeout || e.type == DioExceptionType.connectionTimeout) {
+    if (e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.connectionTimeout) {
       return 'Proses terlalu lama. Google Gemini sedang sibuk. Silakan coba lagi.';
     }
     final data = e.response?.data;
-    if (data is Map && data['message'] is String && (data['message'] as String).isNotEmpty) {
+    if (data is Map &&
+        data['message'] is String &&
+        (data['message'] as String).isNotEmpty) {
       return data['message'] as String;
     }
     return 'Terjadi kesalahan jaringan. Periksa koneksi ke server.';

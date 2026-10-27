@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 class Child extends Equatable {
-  final int id;
+  final String id;
   final String name;
   final String gender;
   final DateTime birthDate;
@@ -25,8 +25,8 @@ class Child extends Equatable {
 }
 
 class ChildMeasurement extends Equatable {
-  final int id;
-  final int childId;
+  final String id;
+  final String childId;
   final double weight;
   final double height;
   final DateTime measuredAt;

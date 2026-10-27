@@ -170,7 +170,7 @@ class _AddEditStockPageState extends State<AddEditStockPage> {
               elevation: 0,
               title: Text(
                 _isEdit ? 'Ubah Stok' : 'Tambah Stok',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.plusJakartaSans(
                   fontWeight: FontWeight.bold,
                   color: AppColors.primaryDark,
                 ),
@@ -186,7 +186,7 @@ class _AddEditStockPageState extends State<AddEditStockPage> {
                     const SizedBox(height: 20),
                     Text(
                       'Jumlah & Satuan',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: AppColors.primaryDark,
@@ -219,7 +219,7 @@ class _AddEditStockPageState extends State<AddEditStockPage> {
                     const SizedBox(height: 20),
                     Text(
                       'Tanggal Kedaluwarsa',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: AppColors.primaryDark,
@@ -256,7 +256,7 @@ class _AddEditStockPageState extends State<AddEditStockPage> {
                                         _selectedDate!,
                                       )
                                     : 'Tanpa tanggal kedaluwarsa',
-                                style: GoogleFonts.poppins(
+                                style: GoogleFonts.plusJakartaSans(
                                   fontSize: 13.5,
                                   color: _selectedDate != null
                                       ? AppColors.primaryDark
@@ -292,7 +292,7 @@ class _AddEditStockPageState extends State<AddEditStockPage> {
                             )
                           : Text(
                               _isEdit ? 'Simpan Perubahan' : 'Tambah ke Stok',
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.plusJakartaSans(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
                               ),
@@ -328,7 +328,7 @@ class _AddEditStockPageState extends State<AddEditStockPage> {
             Expanded(
               child: Text(
                 widget.existingStock!.ingredient.name,
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.plusJakartaSans(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: AppColors.primaryDark,
@@ -345,7 +345,7 @@ class _AddEditStockPageState extends State<AddEditStockPage> {
       children: [
         Text(
           'Pilih Bahan',
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.plusJakartaSans(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: AppColors.primaryDark,
@@ -389,7 +389,7 @@ class _AddEditStockPageState extends State<AddEditStockPage> {
                       dense: true,
                       title: Text(
                         ingredient.name,
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.plusJakartaSans(
                           fontSize: 13.5,
                           fontWeight: FontWeight.w600,
                           color: AppColors.primaryDark,
@@ -399,7 +399,7 @@ class _AddEditStockPageState extends State<AddEditStockPage> {
                         '${ingredient.categoryName ?? ''}'
                         '${(ingredient.categoryName ?? '').isEmpty ? '' : ' \u00B7 '}'
                         '${ingredient.caloriesPer100g.toInt()} kkal/100g',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           color: AppColors.textGrey,
                         ),
@@ -419,7 +419,7 @@ class _AddEditStockPageState extends State<AddEditStockPage> {
   InputDecoration _inputDecoration(String hint, {bool withSearchIcon = false}) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: GoogleFonts.poppins(
+      hintStyle: GoogleFonts.plusJakartaSans(
         fontSize: 13,
         color: AppColors.textGrey.withValues(alpha: 0.7),
       ),
@@ -468,7 +468,7 @@ class _SelectedIngredientTile extends StatelessWidget {
             Expanded(
               child: Text(
                 ingredient.name,
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.plusJakartaSans(
                   fontSize: 13.5,
                   fontWeight: FontWeight.w600,
                   color: Colors.white,

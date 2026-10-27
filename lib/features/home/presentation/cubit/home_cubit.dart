@@ -18,12 +18,11 @@ class HomeCubit extends Cubit<HomeState> {
     emit(HomeLoading());
     final summaryResult = await getDashboardSummaryUsecase();
     final childrenResult = await getChildrenUsecase();
-    summaryResult.fold(
-      (failure) => emit(HomeFailure(failure.message)),
-      (summary) {
-        final children = childrenResult.fold((_) => <Child>[], (list) => list);
-        emit(HomeLoaded(summary, children));
-      },
-    );
+    summaryResult.fold((failure) => emit(HomeFailure(failure.message)), (
+      summary,
+    ) {
+      final children = childrenResult.fold((_) => <Child>[], (list) => list);
+      emit(HomeLoaded(summary, children));
+    });
   }
 }

@@ -19,7 +19,7 @@ class GetChildByIdUsecase {
 
   GetChildByIdUsecase(this.repository);
 
-  Future<Either<Failure, Child>> call(int id) {
+  Future<Either<Failure, Child>> call(String id) {
     return repository.getChildById(id);
   }
 }
@@ -48,7 +48,7 @@ class UpdateChildUsecase {
   UpdateChildUsecase(this.repository);
 
   Future<Either<Failure, Child>> call({
-    required int id,
+    required String id,
     required String name,
     required String gender,
     required DateTime birthDate,
@@ -67,7 +67,7 @@ class DeleteChildUsecase {
 
   DeleteChildUsecase(this.repository);
 
-  Future<Either<Failure, void>> call(int id) {
+  Future<Either<Failure, void>> call(String id) {
     return repository.deleteChild(id);
   }
 }
@@ -75,14 +75,14 @@ class DeleteChildUsecase {
 class GetMeasurementsUsecase {
   final ChildRepository repository;
   GetMeasurementsUsecase(this.repository);
-  Future<Either<Failure, List<ChildMeasurement>>> call(int childId) => repository.getMeasurements(childId);
+  Future<Either<Failure, List<ChildMeasurement>>> call(String childId) => repository.getMeasurements(childId);
 }
 
 class AddMeasurementUsecase {
   final ChildRepository repository;
   AddMeasurementUsecase(this.repository);
   Future<Either<Failure, ChildMeasurement>> call({
-    required int childId,
+    required String childId,
     required double weight,
     required double height,
     required DateTime measuredAt,

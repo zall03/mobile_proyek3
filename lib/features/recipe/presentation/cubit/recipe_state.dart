@@ -20,7 +20,8 @@ abstract class RecipeState extends Equatable {
     if (this is RecipeLoading) return loading();
     if (this is RecipeGenerating) return generating();
     if (this is RecipeLoaded) return loaded((this as RecipeLoaded).recipes);
-    if (this is RecipeDetail) return recipeDetail((this as RecipeDetail).recipe);
+    if (this is RecipeDetail)
+      return recipeDetail((this as RecipeDetail).recipe);
     if (this is RecipeFailure) return failure((this as RecipeFailure).message);
     throw Exception('Unknown state');
   }

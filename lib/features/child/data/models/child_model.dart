@@ -10,7 +10,7 @@ class ChildModel extends Child {
 
   factory ChildModel.fromJson(Map<String, dynamic> json) {
     return ChildModel(
-      id: json['id'] as int,
+      id: json['id'] as String,
       name: json['name'] as String,
       gender: json['gender'] as String,
       birthDate: DateTime.parse(json['birth_date'] as String),

@@ -4,14 +4,20 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../injection_container.dart';
-import '../../../cooking_log/presentation/widgets/cooking_confirmation_dialog.dart';
+import '../../../cooking_log/presentation/widgets/cooking_session_launcher.dart';
+import '../../domain/entities/recipe.dart';
 import '../cubit/recipe_cubit.dart';
 import '../cubit/recipe_state.dart';
+import '../widgets/recipe_body.dart';
 
 class RecipeDetailPage extends StatelessWidget {
   final int recipeId;
 
   const RecipeDetailPage({super.key, required this.recipeId});
+
+  void _startCooking(BuildContext context, Recipe recipe, int servings) {
+    CookingSessionLauncher.start(context, recipe: recipe, servings: servings);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,21 +28,21 @@ class RecipeDetailPage extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
+          automaticallyImplyLeading: false,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: AppColors.primaryDark),
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
-            'Detail Resep',
+            'Resep',
             style: GoogleFonts.playfairDisplay(
               color: AppColors.primaryDark,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w700,
               fontSize: 20,
             ),
           ),
         ),
-        body: BlocConsumer<RecipeCubit, RecipeState>(
-          listener: (context, state) {},
+        body: BlocBuilder<RecipeCubit, RecipeState>(
           builder: (context, state) {
             return state.when(
               initial: () => const SizedBox.shrink(),
@@ -47,185 +53,83 @@ class RecipeDetailPage extends StatelessWidget {
                 child: CircularProgressIndicator(color: AppColors.primaryDark),
               ),
               loaded: (_) => const SizedBox.shrink(),
-              recipeDetail: (recipe) => SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        height: 200,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF81C784), Color(0xFFFDB750)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Center(
-                          child: Icon(Icons.restaurant, color: Colors.white, size: 80),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        recipe.name,
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF263238),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        recipe.description,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14,
-                          color: AppColors.textGrey,
-                          height: 1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFFF3E0),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              '⏱ ${recipe.cookTimeMinutes} menit',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFFE65100),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE6F5E6),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              '${recipe.source == 'manual' ? 'Manual' : 'AI Generated'}',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF1B5E20),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Bahan-Bahan',
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF263238),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      ...recipe.ingredients.map((ing) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 6,
-                                height: 6,
-                                decoration: const BoxDecoration(
-                                  color: AppColors.primaryDark,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  '${ing.ingredientName}: ${ing.quantityNeeded} ${ing.unit}',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 13,
-                                    color: const Color(0xFF263238),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Cara Memasak',
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF263238),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        recipe.instructions,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13,
-                          color: AppColors.textGrey,
-                          height: 1.6,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (_) => CookingConfirmationDialog(
-                                recipeId: recipe.id,
-                                recipeName: recipe.name,
-                                onSuccess: () {
-                                  Navigator.pop(context);
-                                },
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF1B5E20),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          ),
-                          child: Text(
-                            'Masak Sekarang',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                  ),
-                ),
+              recipeDetail: (recipe) => RecipeBody(
+                recipe: recipe,
+                onCook: (servings) => _startCooking(context, recipe, servings),
               ),
-              failure: (message) => Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.error_outline, color: Colors.red, size: 56),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Gagal memuat detail resep',
-                      style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
-                    ),
-                  ],
-                ),
+              failure: (message) => _ErrorView(
+                title: 'Gagal memuat resep',
+                message: message,
+                onRetry: () =>
+                    context.read<RecipeCubit>().getRecipeDetail(recipeId),
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _ErrorView extends StatelessWidget {
+  final String title;
+  final String message;
+  final VoidCallback onRetry;
+
+  const _ErrorView({
+    required this.title,
+    required this.message,
+    required this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, color: Color(0xFFB3261E), size: 48),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF111827),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 13,
+                color: AppColors.textGrey,
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              height: 46,
+              child: OutlinedButton(
+                onPressed: onRetry,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primaryDark,
+                  side: const BorderSide(color: AppColors.primaryDark),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Text(
+                  'Coba lagi',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

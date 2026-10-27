@@ -16,8 +16,10 @@ abstract class CookingLogState extends Equatable {
   }) {
     if (this is CookingLogInitial) return initial();
     if (this is CookingLogLoading) return loading();
-    if (this is CookingLogSuccess) return success((this as CookingLogSuccess).log);
-    if (this is CookingLogFailure) return failure((this as CookingLogFailure).message);
+    if (this is CookingLogSuccess)
+      return success((this as CookingLogSuccess).log);
+    if (this is CookingLogFailure)
+      return failure((this as CookingLogFailure).message);
     throw Exception('Unknown state');
   }
 }

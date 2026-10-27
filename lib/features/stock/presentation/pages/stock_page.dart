@@ -60,11 +60,11 @@ class _StockBodyState extends State<_StockBody> {
       builder: (ctx) => AlertDialog(
         title: Text(
           'Hapus stok',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
         ),
         content: Text(
           'Hapus ${stock.ingredient.name} dari stok Anda?',
-          style: GoogleFonts.poppins(fontSize: 13),
+          style: GoogleFonts.plusJakartaSans(fontSize: 13),
         ),
         actions: [
           TextButton(
@@ -92,7 +92,7 @@ class _StockBodyState extends State<_StockBody> {
         elevation: 0,
         title: Text(
           'Stok Saya',
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.plusJakartaSans(
             fontWeight: FontWeight.bold,
             color: AppColors.primaryDark,
           ),
@@ -105,7 +105,7 @@ class _StockBodyState extends State<_StockBody> {
         icon: const Icon(Icons.add),
         label: Text(
           'Tambah Stok',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
         ),
       ),
       body: BlocConsumer<StockCubit, StockState>(
@@ -271,7 +271,7 @@ class _StockContentState extends State<_StockContent> {
         textInputAction: TextInputAction.search,
         decoration: InputDecoration(
           hintText: 'Cari bahan...',
-          hintStyle: GoogleFonts.poppins(fontSize: 13, color: AppColors.textGrey),
+          hintStyle: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppColors.textGrey),
           prefixIcon: const Icon(Icons.search, color: AppColors.textGrey, size: 20),
           suffixIcon: _searchController.text.isEmpty
               ? null
@@ -327,7 +327,7 @@ class _CategoryFilter extends StatelessWidget {
                 onSelected: (_) => onSelected(id),
                 selectedColor: AppColors.primaryDark,
                 backgroundColor: AppColors.cardWhite,
-                labelStyle: GoogleFonts.poppins(
+                labelStyle: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
                   color: selectedId == id ? Colors.white : AppColors.primaryDark,
                   fontWeight: FontWeight.w600,
@@ -362,7 +362,7 @@ class _SectionHeader extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.plusJakartaSans(
               fontSize: 13.5,
               fontWeight: FontWeight.w700,
               color: AppColors.primaryDark,
@@ -377,7 +377,7 @@ class _SectionHeader extends StatelessWidget {
           ),
           child: Text(
             '$count',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.plusJakartaSans(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               color: AppColors.primaryDark,
@@ -398,31 +398,31 @@ class _StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final (bg, fg, label) = switch (stock.status) {
       StockStatus.expired => (
-          const Color(0xFFFEE2E2),
-          const Color(0xFFB91C1C),
+          AppColors.dangerBorder,
+          AppColors.danger,
           'Kedaluwarsa',
         ),
       StockStatus.expiring => (
-          const Color(0xFFFFF4E5),
-          const Color(0xFFB45309),
-          'Sisa ${stock.daysLeft} hari',
+          AppColors.accentOrangeBg,
+          AppColors.warning,
+          'Perlu diolah (${stock.daysLeft}h)',
         ),
       StockStatus.fresh => (
-          const Color(0xFFE8F5E9),
-          const Color(0xFF1B5E20),
+          AppColors.bgGradientStart,
+          AppColors.primary,
           'Aman',
         ),
     };
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3.5),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(99),
+        borderRadius: BorderRadius.circular(9999),
       ),
       child: Text(
         label,
-        style: GoogleFonts.poppins(
+        style: GoogleFonts.plusJakartaSans(
           fontSize: 10.5,
           fontWeight: FontWeight.w600,
           color: fg,
@@ -451,14 +451,14 @@ class _StockCard extends StatelessWidget {
 
     return Material(
       color: AppColors.cardWhite,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.black.withValues(alpha: 0.04)),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           child: Row(
@@ -481,7 +481,7 @@ class _StockCard extends StatelessWidget {
                             stock.ingredient.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.plusJakartaSans(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: AppColors.primaryDark,
@@ -498,7 +498,7 @@ class _StockCard extends StatelessWidget {
                       ' \u00B7 ${stock.ingredient.categoryName ?? ''}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.plusJakartaSans(
                         fontSize: 12,
                         color: AppColors.textGrey,
                       ),
@@ -507,7 +507,7 @@ class _StockCard extends StatelessWidget {
                       const SizedBox(height: 3),
                       Text(
                         'Kedaluwarsa ${DateFormat('dd/MM/yyyy').format(expiry)}',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           color: AppColors.textGrey,
                         ),
@@ -556,7 +556,7 @@ class _EmptyState extends StatelessWidget {
             Text(
               'Belum ada stok',
               textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.plusJakartaSans(
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
                 color: AppColors.primaryDark,
@@ -566,7 +566,7 @@ class _EmptyState extends StatelessWidget {
             Text(
               hint,
               textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.plusJakartaSans(
                 fontSize: 12.5,
                 color: AppColors.textGrey,
                 height: 1.5,
@@ -578,7 +578,7 @@ class _EmptyState extends StatelessWidget {
                 onPressed: onAction,
                 child: Text(
                   'Lihat semua stok',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.plusJakartaSans(
                     fontWeight: FontWeight.w600,
                     color: AppColors.primaryDark,
                   ),
@@ -630,7 +630,7 @@ class _CenteredStatus extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
                 color: AppColors.textGrey,
               ),

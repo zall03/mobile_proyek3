@@ -44,7 +44,7 @@ class ChildCubit extends Cubit<ChildState> {
   }
 
   Future<void> updateChild({
-    required int id,
+    required String id,
     required String name,
     required String gender,
     required DateTime birthDate,
@@ -61,7 +61,7 @@ class ChildCubit extends Cubit<ChildState> {
     );
   }
 
-  Future<void> deleteChild(int id) async {
+  Future<void> deleteChild(String id) async {
     final result = await deleteChildUsecase(id);
     result.fold(
       (failure) => emit(ChildFailure(failure.message)),

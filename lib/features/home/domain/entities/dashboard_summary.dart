@@ -18,5 +18,11 @@ class DashboardSummary extends Equatable {
   });
 
   @override
-  List<Object?> get props => [totalStocks, expiringCount, expiredCount, criticalItems, recentStocks];
+  List<Object?> get props => [
+    totalStocks,
+    expiringCount,
+    expiredCount,
+    criticalItems,
+    recentStocks,
+  ];
 }

@@ -47,7 +47,7 @@ class WelcomePage extends StatelessWidget {
                 const SizedBox(height: 16),
                 Text(
                   'Dapur Cerdas',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: AppColors.primaryDark,
@@ -57,7 +57,7 @@ class WelcomePage extends StatelessWidget {
                 Text(
                   'Solusi Masak Cerdas, Cegah Stunting, & Gizi Terjaga',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: AppColors.oliveText,
@@ -68,7 +68,7 @@ class WelcomePage extends StatelessWidget {
                   'Dampingi tumbuh kembang buah hati dengan sajian '
                   'rumahan bernutrisi tinggi berbasis kearifan pangan lokal.',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 12.5,
                     color: AppColors.textGrey,
                     height: 1.5,
@@ -112,7 +112,7 @@ class WelcomePage extends StatelessWidget {
                       children: [
                         Text(
                           'Masuk ke Akun',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.plusJakartaSans(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
@@ -152,7 +152,7 @@ class WelcomePage extends StatelessWidget {
                         const SizedBox(width: 6),
                         Text(
                           'Daftar Akun Baru Bunda',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.plusJakartaSans(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                             color: AppColors.primaryDark,
@@ -172,7 +172,7 @@ class WelcomePage extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   'JARINGAN KESEHATAN TERPADU',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.5,
@@ -181,9 +181,9 @@ class WelcomePage extends StatelessWidget {
                 ),
                 Text(
                   'Bekerjasama dengan Posyandu & Puskesmas Terpadu',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 10.5,
-                    color: AppColors.accentOrange,
+                    color: AppColors.accentOrangeText,
                   ),
                 ),
                 const SizedBox(height: 16),

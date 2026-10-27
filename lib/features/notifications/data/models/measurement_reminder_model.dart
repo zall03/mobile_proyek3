@@ -14,7 +14,7 @@ class MeasurementReminderModel extends MeasurementReminder {
 
   factory MeasurementReminderModel.fromJson(Map<String, dynamic> json) {
     return MeasurementReminderModel(
-      childId: json['child_id'] as int,
+      childId: json['child_id'] as String,
       name: json['name'] as String,
       gender: (json['gender'] as String?) ?? 'male',
       birthDate: DateTime.parse(json['birth_date'] as String),

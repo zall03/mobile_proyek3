@@ -46,3 +46,12 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Firebase / Google Services Credentials
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
+docs/
+anti-slop/
+.agents/skills
+

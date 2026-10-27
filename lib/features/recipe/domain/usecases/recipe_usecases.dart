@@ -29,7 +29,15 @@ class GenerateRecipeUsecase {
 
   GenerateRecipeUsecase(this.repository);
 
-  Future<Either<Failure, Recipe>> call(List<int> ingredientIds) {
-    return repository.generateRecipe(ingredientIds);
+  Future<Either<Failure, Recipe>> call(
+    List<int> ingredientIds, {
+    String? forWhom,
+    List<String>? restrictions,
+  }) {
+    return repository.generateRecipe(
+      ingredientIds,
+      forWhom: forWhom,
+      restrictions: restrictions,
+    );
   }
 }

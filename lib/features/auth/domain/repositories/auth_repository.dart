@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/failures.dart';
+import '../entities/register_outcome.dart';
 import '../entities/user.dart';
 
 abstract class AuthRepository {
@@ -8,7 +9,7 @@ abstract class AuthRepository {
     required String email,
     required String password,
   });
-  Future<Either<Failure, String>> register({
+  Future<Either<Failure, RegisterOutcome>> register({
     required String name,
     required String email,
     required String password,
@@ -18,13 +19,12 @@ abstract class AuthRepository {
     required String otpCode,
   });
   Future<Either<Failure, String>> resendOtp({required String email});
-  Future<Either<Failure, User>> googleSignIn({required String idToken});
+  Future<Either<Failure, User?>> googleSignIn();
   Future<Either<Failure, User>> getMe();
   Future<Either<Failure, User>> updateMe({required String name});
   Future<Either<Failure, void>> changePassword({
     required String currentPassword,
     required String newPassword,
-    required String newPasswordConfirmation,
   });
   Future<void> logout();
 }

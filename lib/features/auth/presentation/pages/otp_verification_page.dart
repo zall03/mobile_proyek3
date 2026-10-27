@@ -157,7 +157,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                           style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.primaryDark,
+                            color: AppColors.primary,
                           ),
                         ),
                       ),
@@ -169,10 +169,11 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             shape: BoxShape.circle,
+                            border: Border.all(color: AppColors.border),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primaryDark.withValues(
-                                  alpha: 0.1,
+                                color: AppColors.primary.withValues(
+                                  alpha: 0.08,
                                 ),
                                 blurRadius: 16,
                                 offset: const Offset(0, 4),
@@ -182,7 +183,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                           child: const Icon(
                             Icons.mark_email_unread_outlined,
                             size: 44,
-                            color: AppColors.primaryMedium,
+                            color: AppColors.primary,
                           ),
                         ),
                       ),
@@ -193,7 +194,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                         style: GoogleFonts.poppins(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primaryDark,
+                          color: AppColors.primary,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -201,7 +202,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                         'Kode verifikasi telah dikirim ke\n${_maskEmail(widget.email)}.',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.poppins(
-                          fontSize: 12.5,
+                          fontSize: 13,
                           color: AppColors.textGrey,
                           height: 1.5,
                         ),
@@ -223,19 +224,17 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                           borderRadius: BorderRadius.circular(14),
                           fieldHeight: 52,
                           fieldWidth: 46,
-                          activeColor: AppColors.primaryMedium,
+                          activeColor: AppColors.primary,
                           activeFillColor: Colors.white,
-                          selectedColor: AppColors.primaryMedium,
+                          selectedColor: AppColors.primary,
                           selectedFillColor: Colors.white,
-                          inactiveColor: AppColors.primaryLight.withValues(
-                            alpha: 0.4,
-                          ),
+                          inactiveColor: AppColors.border,
                           inactiveFillColor: Colors.white,
                         ),
                         textStyle: GoogleFonts.poppins(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.primaryDark,
+                          color: AppColors.ink,
                         ),
                         errorAnimationController: null,
                       ),
@@ -251,7 +250,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                                   style: GoogleFonts.poppins(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
-                                    color: AppColors.primaryDark,
+                                    color: AppColors.primary,
                                   ),
                                 ),
                               )
@@ -271,9 +270,9 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                               ? null
                               : () => _handleVerify(context),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryDark,
+                            backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            minimumSize: const Size.fromHeight(52),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                             ),
@@ -288,10 +287,10 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                                   ),
                                 )
                               : Text(
-                                  'Verifikasi & Daftar',
+                                  'Verifikasi & Masuk',
                                   style: GoogleFonts.poppins(
                                     fontWeight: FontWeight.w600,
-                                    fontSize: 13.5,
+                                    fontSize: 14,
                                   ),
                                 ),
                         ),
@@ -301,7 +300,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                         child: Text(
                           'Jangan bagikan kode verifikasi ini kepada siapa pun',
                           style: GoogleFonts.poppins(
-                            fontSize: 10.5,
+                            fontSize: 11,
                             color: AppColors.textGrey,
                           ),
                         ),

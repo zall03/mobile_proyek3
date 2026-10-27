@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../home/presentation/pages/home_page.dart';
 import '../../../welcome/presentation/pages/welcome_page.dart';
 import '../../../../core/theme/app_colors.dart';
 
@@ -24,13 +26,25 @@ class _SplashPageState extends State<SplashPage>
       duration: const Duration(milliseconds: 1800),
     )..forward();
     Future.delayed(const Duration(milliseconds: 2200), () {
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const WelcomePage()),
-        );
-      }
+      if (!mounted) return;
+      final session = Supabase.instance.client.auth.currentSession;
+      final destination = session == null
+          ? const WelcomePage()
+          : HomePage(userName: _displayName(session.user));
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => destination),
+      );
     });
+  }
+
+  /// Nama tampilan awal dari metadata sesi; halaman profil menyegarkan dari API.
+  String _displayName(User user) {
+    final metaName = user.userMetadata?['name'] as String?;
+    if (metaName != null && metaName.trim().isNotEmpty) return metaName.trim();
+    final email = user.email;
+    if (email != null && email.contains('@')) return email.split('@').first;
+    return 'Pengguna';
   }
 
   @override
@@ -77,7 +91,7 @@ class _SplashPageState extends State<SplashPage>
                 const SizedBox(height: 20),
                 Text(
                   'Dapur Cerdas',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
                     color: AppColors.primaryDark,
@@ -87,7 +101,7 @@ class _SplashPageState extends State<SplashPage>
                 Text(
                   'Solusi Masak Cerdas,\nCegah Stunting, & Gizi Terjaga',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
                     color: AppColors.textGrey,
                     height: 1.4,

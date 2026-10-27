@@ -15,7 +15,7 @@ class NutritionPage extends StatelessWidget {
         elevation: 0,
         title: Text(
           'Nutrisi',
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.plusJakartaSans(
             fontWeight: FontWeight.bold,
             color: AppColors.primaryDark,
           ),
@@ -98,7 +98,7 @@ class _NutritionBodyState extends State<_NutritionBody> {
               children: [
                 Text(
                   'Analisis Nutrisi Harian',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
@@ -117,7 +117,7 @@ class _NutritionBodyState extends State<_NutritionBody> {
                       alignment: Alignment.center,
                       child: Text(
                         'R',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
                         ),
@@ -127,7 +127,7 @@ class _NutritionBodyState extends State<_NutritionBody> {
                     Expanded(
                       child: Text(
                         'Rayyan Pratara (18 Bulan)',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.plusJakartaSans(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
@@ -157,7 +157,7 @@ class _NutritionBodyState extends State<_NutritionBody> {
                       const SizedBox(width: 6),
                       Text(
                         'Target 1.100 kkal',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                           color: AppColors.primaryDark,
@@ -169,7 +169,7 @@ class _NutritionBodyState extends State<_NutritionBody> {
                 const SizedBox(height: 10),
                 Text(
                   'Hari Ini, 24 Okt',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 11.5,
                     color: Colors.white70,
                   ),
@@ -214,7 +214,7 @@ class _PeriodTabs extends StatelessWidget {
                     ),
                     child: Text(
                       label,
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.plusJakartaSans(
                         fontSize: 11.5,
                         fontWeight: FontWeight.w600,
                         color: label == active
@@ -249,7 +249,7 @@ class _GiziRingCard extends StatelessWidget {
         children: [
           Text(
             'CAPAIAN GIZI HARI INI',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.plusJakartaSans(
               fontSize: 12,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.2,
@@ -259,7 +259,7 @@ class _GiziRingCard extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             'Sesuai Standar WHO',
-            style: GoogleFonts.poppins(fontSize: 11, color: AppColors.textGrey),
+            style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppColors.textGrey),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -284,7 +284,7 @@ class _GiziRingCard extends StatelessWidget {
                   children: [
                     Text(
                       '88%',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.plusJakartaSans(
                         fontSize: 34,
                         fontWeight: FontWeight.w800,
                         color: AppColors.primaryDark,
@@ -302,7 +302,7 @@ class _GiziRingCard extends StatelessWidget {
                       ),
                       child: Text(
                         'GIZI OPTIMAL',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.plusJakartaSans(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 1,
@@ -319,7 +319,7 @@ class _GiziRingCard extends StatelessWidget {
           RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
                 color: AppColors.textGrey,
               ),
@@ -327,7 +327,7 @@ class _GiziRingCard extends StatelessWidget {
                 const TextSpan(text: 'Tingkat Kecukupan Gizi: '),
                 TextSpan(
                   text: 'Sangat Baik',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.plusJakartaSans(
                     fontWeight: FontWeight.w700,
                     color: AppColors.primaryDark,
                   ),
@@ -365,7 +365,7 @@ class _SectionLabel extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.plusJakartaSans(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
                 color: AppColors.primaryDark,
@@ -390,7 +390,7 @@ class _SectionSub extends StatelessWidget {
       padding: padding,
       child: Text(
         text,
-        style: GoogleFonts.poppins(fontSize: 11.5, color: AppColors.textGrey),
+        style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: AppColors.textGrey),
       ),
     );
   }
@@ -481,7 +481,7 @@ class _MacroCard extends StatelessWidget {
                   children: [
                     Text(
                       macro.title,
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: AppColors.primaryDark,
@@ -490,7 +490,7 @@ class _MacroCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       macro.value,
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.plusJakartaSans(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                         color: macro.color,
@@ -517,7 +517,7 @@ class _MacroCard extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: Text(
               macro.desc,
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.plusJakartaSans(
                 fontSize: 11,
                 color: AppColors.textGrey,
               ),
@@ -537,7 +537,7 @@ class _MacroCard extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: GoogleFonts.poppins(
+        style: GoogleFonts.plusJakartaSans(
           fontSize: 10,
           fontWeight: FontWeight.w600,
           color: AppColors.primaryDark,
@@ -663,7 +663,7 @@ class _MicroSection extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.plusJakartaSans(
             fontSize: 11,
             fontWeight: FontWeight.w600,
             color: active ? Colors.white : AppColors.primaryDark,
@@ -690,7 +690,7 @@ class _MicroRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   micro.name,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: AppColors.primaryDark,
@@ -699,7 +699,7 @@ class _MicroRow extends StatelessWidget {
               ),
               Text(
                 micro.pct,
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.plusJakartaSans(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: micro.color,
@@ -725,7 +725,7 @@ class _MicroRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   micro.desc,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
                     color: AppColors.textGrey,
                   ),
@@ -832,7 +832,7 @@ class _MealTile extends StatelessWidget {
                 ),
                 child: Text(
                   meal.time,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: meal.color,
@@ -842,7 +842,7 @@ class _MealTile extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 meal.kcal,
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.plusJakartaSans(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textGrey,
@@ -868,7 +868,7 @@ class _MealTile extends StatelessWidget {
                     Expanded(
                       child: Text(
                         meal.isPlan ? '${meal.type} (RENCANA)' : meal.type,
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.plusJakartaSans(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.8,
@@ -881,7 +881,7 @@ class _MealTile extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   meal.name,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 13.5,
                     fontWeight: FontWeight.w600,
                     color: AppColors.primaryDark,
@@ -892,7 +892,7 @@ class _MealTile extends StatelessWidget {
                   meal.desc,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
                     color: AppColors.textGrey,
                   ),
@@ -936,7 +936,7 @@ class _ExportCard extends StatelessWidget {
               children: [
                 Text(
                   'Unduh Laporan Nutrisi',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
@@ -945,7 +945,7 @@ class _ExportCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   'Format PDF resmi untuk konsultasi dengan Posyandu/Dokter',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 10.5,
                     color: Colors.white70,
                   ),
@@ -970,7 +970,7 @@ class _ExportCard extends StatelessWidget {
             ),
             child: Text(
               'Ekspor',
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
               ),

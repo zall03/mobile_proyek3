@@ -21,7 +21,7 @@ class ChildRepositoryImpl implements ChildRepository {
   }
 
   @override
-  Future<Either<Failure, Child>> getChildById(int id) async {
+  Future<Either<Failure, Child>> getChildById(String id) async {
     try {
       final child = await remoteDatasource.getChildById(id);
       return Right(child);
@@ -50,7 +50,7 @@ class ChildRepositoryImpl implements ChildRepository {
 
   @override
   Future<Either<Failure, Child>> updateChild({
-    required int id,
+    required String id,
     required String name,
     required String gender,
     required DateTime birthDate,
@@ -69,7 +69,7 @@ class ChildRepositoryImpl implements ChildRepository {
   }
 
   @override
-  Future<Either<Failure, void>> deleteChild(int id) async {
+  Future<Either<Failure, void>> deleteChild(String id) async {
     try {
       await remoteDatasource.deleteChild(id);
       return const Right(null);
@@ -79,7 +79,7 @@ class ChildRepositoryImpl implements ChildRepository {
   }
 
   @override
-  Future<Either<Failure, List<ChildMeasurement>>> getMeasurements(int childId) async {
+  Future<Either<Failure, List<ChildMeasurement>>> getMeasurements(String childId) async {
     try {
       final data = await remoteDatasource.getMeasurements(childId);
       return Right(data);
@@ -90,7 +90,7 @@ class ChildRepositoryImpl implements ChildRepository {
 
   @override
   Future<Either<Failure, ChildMeasurement>> addMeasurement({
-    required int childId,
+    required String childId,
     required double weight,
     required double height,
     required DateTime measuredAt,

@@ -3,7 +3,7 @@ import 'package:equatable/equatable.dart';
 import '../../../stock/domain/entities/stock.dart';
 
 class MeasurementReminder extends Equatable {
-  final int childId;
+  final String childId;
   final String name;
   final String gender;
   final DateTime birthDate;

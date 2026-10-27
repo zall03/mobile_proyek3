@@ -1,25 +1,24 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../config/app_config.dart';
 
 class DioClient {
   final Dio dio;
-  final FlutterSecureStorage secureStorage;
 
-  DioClient(this.secureStorage)
-    : dio = Dio(
+  DioClient() : dio = Dio(
         BaseOptions(
-          baseUrl:
-              'http://10.0.172.199:8000/api', // Laragon via Android emulator
-          connectTimeout: const Duration(seconds: 60),
+          baseUrl: AppConfig.apiBaseUrl,
+          connectTimeout: const Duration(seconds: 30),
           receiveTimeout: const Duration(seconds: 120),
           headers: {'Accept': 'application/json'},
         ),
       ) {
     dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (options, handler) async {
-          final token = await secureStorage.read(key: 'auth_token');
-          if (token != null) {
+        onRequest: (options, handler) {
+          final token = Supabase.instance.client.auth.currentSession?.accessToken;
+          if (token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';
           }
           return handler.next(options);

@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/failures.dart';
-import '../entities/cooking_log.dart';
-import '../repositories/cooking_log_repository.dart';
+import '../../domain/entities/cooking_log.dart';
+import '../../domain/repositories/cooking_log_repository.dart';
 
 class LogCookingUsecase {
   final CookingLogRepository repository;
@@ -12,7 +12,22 @@ class LogCookingUsecase {
   Future<Either<Failure, CookingLog>> call({
     required int recipeId,
     required int servings,
+    int? durationMinutes,
   }) {
-    return repository.logCooking(recipeId: recipeId, servings: servings);
+    return repository.logCooking(
+      recipeId: recipeId,
+      servings: servings,
+      durationMinutes: durationMinutes,
+    );
+  }
+}
+
+class GetCookingHistoryUsecase {
+  final CookingLogRepository repository;
+
+  GetCookingHistoryUsecase(this.repository);
+
+  Future<Either<Failure, List<CookingLog>>> call({int days = 30}) {
+    return repository.getHistory(days: days);
   }
 }

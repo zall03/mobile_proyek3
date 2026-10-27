@@ -14,7 +14,7 @@ class RecipeRepositoryImpl implements RecipeRepository {
   Future<Either<Failure, List<Recipe>>> getRecipes() async {
     try {
       final recipes = await remoteDatasource.getRecipes();
-      return Right(recipes);
+      return Right(recipes.map((model) => model.toEntity()).toList());
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }
@@ -24,18 +24,26 @@ class RecipeRepositoryImpl implements RecipeRepository {
   Future<Either<Failure, Recipe>> getRecipeById(int id) async {
     try {
       final recipe = await remoteDatasource.getRecipeById(id);
-      return Right(recipe);
+      return Right(recipe.toEntity());
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, Recipe>> generateRecipe(List<int> ingredientIds) async {
+  Future<Either<Failure, Recipe>> generateRecipe(
+    List<int> ingredientIds, {
+    String? forWhom,
+    List<String>? restrictions,
+  }) async {
     try {
-      final recipe = await remoteDatasource.generateRecipe(ingredientIds);
-      return Right(recipe);
-    } catch (e) {
+      final result = await remoteDatasource.generateRecipe(
+        ingredientIds,
+        forWhom: forWhom,
+        restrictions: restrictions,
+      );
+      return Right(result.toEntity());
+    } on Exception catch (e) {
       return Left(ServerFailure(e.toString()));
     }
   }

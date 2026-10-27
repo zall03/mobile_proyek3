@@ -50,7 +50,7 @@ class FeatureHighlightCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         title,
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.plusJakartaSans(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFF1F2937),
@@ -68,7 +68,7 @@ class FeatureHighlightCard extends StatelessWidget {
                       ),
                       child: Text(
                         badgeText,
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.plusJakartaSans(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
                           color: badgeColor,
@@ -80,7 +80,7 @@ class FeatureHighlightCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   description,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
                     color: AppColors.textGrey,
                     height: 1.4,

@@ -18,7 +18,7 @@ class ChildRemoteDatasource {
     }
   }
 
-  Future<ChildModel> getChildById(int id) async {
+  Future<ChildModel> getChildById(String id) async {
     try {
       final response = await dio.get('/children/$id');
       return ChildModel.fromJson(response.data['data'] as Map<String, dynamic>);
@@ -48,7 +48,7 @@ class ChildRemoteDatasource {
   }
 
   Future<ChildModel> updateChild({
-    required int id,
+    required String id,
     required String name,
     required String gender,
     required DateTime birthDate,
@@ -68,7 +68,7 @@ class ChildRemoteDatasource {
     }
   }
 
-  Future<void> deleteChild(int id) async {
+  Future<void> deleteChild(String id) async {
     try {
       await dio.delete('/children/$id');
     } catch (e) {
@@ -76,7 +76,7 @@ class ChildRemoteDatasource {
     }
   }
 
-  Future<List<ChildMeasurementModel>> getMeasurements(int childId) async {
+  Future<List<ChildMeasurementModel>> getMeasurements(String childId) async {
     try {
       final response = await dio.get('/children/$childId/measurements');
       final list = response.data['data'] as List<dynamic>;
@@ -87,7 +87,7 @@ class ChildRemoteDatasource {
   }
 
   Future<ChildMeasurementModel> addMeasurement({
-    required int childId,
+    required String childId,
     required double weight,
     required double height,
     required DateTime measuredAt,

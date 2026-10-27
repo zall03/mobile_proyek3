@@ -171,7 +171,7 @@ class ChildListPage extends StatelessWidget {
     );
   }
 
-  void _showDeleteConfirm(BuildContext context, int childId) {
+  void _showDeleteConfirm(BuildContext context, String childId) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(

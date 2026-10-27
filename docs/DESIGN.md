@@ -175,3 +175,25 @@ Pengingat     : daftar bahan dengan expiry_date <= N hari
 - **Konvensi penulisan**: ikuti pola yang sudah ada (lihat `AuthController`).
 - **Tanpa fitur mati**: elemen UI tanpa perilaku nyata tidak dikirim; beri label "Segera"
   bila fitur ditunda.
+
+## 11. Identitas Visual
+
+**Motif**: hijau pangan segar bertingkat pada latar hijau lembut (`#F2F9F2`). Hijau utama (`#176B2C`)
+untuk aksi dan tombol, hijau dalam (`#0F3D1E`) untuk hero, serta aksen hangat oranye (`#F79500` / teks AA `#A46A00`)
+khusus untuk racik resep dan sorotan hangat.
+Radius mengikuti sistem: 28 hero/panel utama, 16-24 kartu konten, 12-18 input dan tombol umum (52px),
+serta 9999 chip status dan filter.
+
+**Tipografi**
+- *Font antarmuka utama*: **Plus Jakarta Sans** (400-800). Dipakai konsisten pada dashboard, stok,
+  profil, resep, dan data. Bersih serta mudah dipindai di layar kecil.
+- *Font formulir dan autentikasi*: **Poppins** (400-800). Dipakai pada layar masuk dan daftar untuk
+  memberi nuansa ramah serta jelas pada formulir.
+- *Display / editorial*: **Playfair Display** (weight 700). Merek terasa hangat dan personal pada sapaan hero.
+- Seluruh keluarga font **di-bundle lokal** di `assets/google_fonts/`; runtime fetch dimatikan agar tampilan
+  stabil tanpa ketergantungan jaringan.
+
+**Dial**: ENERGY 2 / RHYTHM 2 / MOTION 1.
+
+Dial ini mengikat seluruh layar: hijau segar terarah sebagai identitas, komposisi dinamis antarseksi,
+dan gerak dibatasi pada hover, tekan, serta transisi singkat (motion 200ms). Tidak ada animasi berulang tanpa pemicu.

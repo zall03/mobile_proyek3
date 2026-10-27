@@ -8,7 +8,7 @@ class GoogleSignInUsecase {
   final AuthRepository repository;
   GoogleSignInUsecase(this.repository);
 
-  Future<Either<Failure, User>> call({required String idToken}) {
-    return repository.googleSignIn(idToken: idToken);
+  Future<Either<Failure, User?>> call() {
+    return repository.googleSignIn();
   }
 }

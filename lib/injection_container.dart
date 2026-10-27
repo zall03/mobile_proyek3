@@ -1,8 +1,7 @@
 import 'package:get_it/get_it.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/network/dio_client.dart';
-import 'core/services/google_auth_service.dart';
 import 'features/auth/data/datasources/auth_remote_datasource.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'features/auth/domain/repositories/auth_repository.dart';
@@ -44,25 +43,31 @@ import 'features/cooking_log/data/datasources/cooking_log_remote_datasource.dart
 import 'features/cooking_log/data/repositories/cooking_log_repository_impl.dart';
 import 'features/cooking_log/domain/repositories/cooking_log_repository.dart';
 import 'features/cooking_log/domain/usecases/log_cooking_usecase.dart';
+import 'features/cooking_log/presentation/cubit/cooking_history_cubit.dart';
 import 'features/cooking_log/presentation/cubit/cooking_log_cubit.dart';
 import 'features/child/data/datasources/child_remote_datasource.dart';
 import 'features/child/data/repositories/child_repository_impl.dart';
 import 'features/child/domain/repositories/child_repository.dart';
 import 'features/child/domain/usecases/child_usecases.dart';
 import 'features/child/presentation/cubit/child_cubit.dart';
+import 'features/pregnancy/data/datasources/pregnancy_remote_datasource.dart';
+import 'features/pregnancy/data/repositories/pregnancy_repository_impl.dart';
+import 'features/pregnancy/domain/repositories/pregnancy_repository.dart';
+import 'features/pregnancy/domain/usecases/pregnancy_usecases.dart';
+import 'features/pregnancy/presentation/cubit/pregnancy_cubit.dart';
 
 final sl = GetIt.instance;
 
 Future<void> initDependencies() async {
   // Core
-  sl.registerLazySingleton(() => const FlutterSecureStorage());
-  sl.registerLazySingleton(() => DioClient(sl()));
-  sl.registerLazySingleton(() => GoogleAuthService());
+  sl.registerLazySingleton(() => DioClient());
 
   // Auth feature
-  sl.registerLazySingleton(() => AuthRemoteDatasource(sl<DioClient>().dio));
+  sl.registerLazySingleton(
+    () => AuthRemoteDatasource(Supabase.instance.client, sl<DioClient>().dio),
+  );
   sl.registerLazySingleton<AuthRepository>(
-    () => AuthRepositoryImpl(sl(), sl()),
+    () => AuthRepositoryImpl(sl()),
   );
   sl.registerLazySingleton(() => LoginUsecase(sl()));
   sl.registerLazySingleton(() => RegisterUsecase(sl()));
@@ -107,10 +112,7 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<HomeRepository>(() => HomeRepositoryImpl(sl()));
   sl.registerLazySingleton(() => GetDashboardSummaryUsecase(sl()));
   sl.registerFactory(
-    () => HomeCubit(
-      getDashboardSummaryUsecase: sl(),
-      getChildrenUsecase: sl(),
-    ),
+    () => HomeCubit(getDashboardSummaryUsecase: sl(), getChildrenUsecase: sl()),
   );
 
   // Recipe feature
@@ -138,12 +140,16 @@ Future<void> initDependencies() async {
   sl.registerFactory(() => NotificationsCubit(getNotificationsUsecase: sl()));
 
   // Cooking Log feature
-  sl.registerLazySingleton(() => CookingLogRemoteDatasource(sl<DioClient>().dio));
+  sl.registerLazySingleton(
+    () => CookingLogRemoteDatasource(sl<DioClient>().dio),
+  );
   sl.registerLazySingleton<CookingLogRepository>(
     () => CookingLogRepositoryImpl(sl()),
   );
   sl.registerLazySingleton(() => LogCookingUsecase(sl()));
-  sl.registerFactory(() => CookingLogCubit(logCookingUsecase: sl()));
+  sl.registerLazySingleton(() => GetCookingHistoryUsecase(sl()));
+  sl.registerFactory(() => CookingLogCubit(logCooking: sl()));
+  sl.registerFactory(() => CookingHistoryCubit(getHistory: sl()));
 
   // Child feature
   sl.registerLazySingleton(() => ChildRemoteDatasource(sl<DioClient>().dio));
@@ -162,6 +168,28 @@ Future<void> initDependencies() async {
       createChildUsecase: sl(),
       updateChildUsecase: sl(),
       deleteChildUsecase: sl(),
+    ),
+  );
+
+  // Pregnancy feature
+  sl.registerLazySingleton(
+    () => PregnancyRemoteDatasource(sl<DioClient>().dio),
+  );
+  sl.registerLazySingleton<PregnancyRepository>(
+    () => PregnancyRepositoryImpl(sl()),
+  );
+  sl.registerLazySingleton(() => GetActivePregnancyUsecase(sl()));
+  sl.registerLazySingleton(() => GetAllPregnanciesUsecase(sl()));
+  sl.registerLazySingleton(() => SavePregnancyUsecase(sl()));
+  sl.registerLazySingleton(() => MarkPregnancyDeliveredUsecase(sl()));
+  sl.registerLazySingleton(() => DeletePregnancyUsecase(sl()));
+  sl.registerFactory(
+    () => PregnancyCubit(
+      getActive: sl(),
+      getAll: sl(),
+      save: sl(),
+      markDelivered: sl(),
+      deletePregnancy: sl(),
     ),
   );
 }

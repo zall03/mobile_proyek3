@@ -61,7 +61,8 @@ class RecipeListPage extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => RecipeDetailPage(recipeId: recipe.id),
+                                builder: (_) =>
+                                    RecipeDetailPage(recipeId: recipe.id),
                               ),
                             );
                           },
@@ -73,11 +74,17 @@ class RecipeListPage extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, color: Colors.red, size: 56),
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 56,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       'Gagal memuat resep',
-                      style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Padding(
@@ -117,7 +124,13 @@ class _RecipeCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 1))],
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 4,
+              offset: Offset(0, 1),
+            ),
+          ],
         ),
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -146,7 +159,10 @@ class _RecipeCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFF3E0),
                     borderRadius: BorderRadius.circular(6),
@@ -162,7 +178,10 @@ class _RecipeCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFE6F5E6),
                     borderRadius: BorderRadius.circular(6),

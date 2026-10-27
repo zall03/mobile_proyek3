@@ -11,8 +11,8 @@ class ChildMeasurementModel extends ChildMeasurement {
 
   factory ChildMeasurementModel.fromJson(Map<String, dynamic> json) {
     return ChildMeasurementModel(
-      id: json['id'] as int,
-      childId: json['child_id'] as int,
+      id: json['id'] as String,
+      childId: json['child_id'] as String,
       weight: (json['weight'] as num).toDouble(),
       height: (json['height'] as num).toDouble(),
       measuredAt: DateTime.parse(json['measured_at'] as String),

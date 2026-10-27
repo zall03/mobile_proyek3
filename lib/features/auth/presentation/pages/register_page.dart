@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../injection_container.dart';
-import '../../../../core/services/google_auth_service.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -48,19 +47,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _handleGoogleSignIn(BuildContext ctx) async {
-    try {
-      final idToken = await sl<GoogleAuthService>().getIdToken();
-      if (!ctx.mounted) return;
-      ctx.read<AuthCubit>().googleSignIn(idToken: idToken);
-    } catch (e) {
-      if (!ctx.mounted) return;
-      ScaffoldMessenger.of(ctx).showSnackBar(
-        SnackBar(
-          content: Text('Gagal masuk dengan Google: $e'),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-    }
+    ctx.read<AuthCubit>().googleSignIn();
   }
 
   @override
@@ -118,7 +105,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.primaryDark,
+                            color: AppColors.primary,
                           ),
                         ),
                       ),
@@ -128,14 +115,14 @@ class _RegisterPageState extends State<RegisterPage> {
                         style: GoogleFonts.poppins(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primaryDark,
+                          color: AppColors.primary,
                         ),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         'Mulai langkah cerdas penuhi nutrisi terbaik untuk\ntumbuh kembang optimal Si Kecil.',
                         style: GoogleFonts.poppins(
-                          fontSize: 12.5,
+                          fontSize: 13,
                           color: AppColors.oliveText,
                           height: 1.4,
                         ),
@@ -156,7 +143,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 Text(
                                   'Wajib diisi',
                                   style: GoogleFonts.poppins(
-                                    fontSize: 10.5,
+                                    fontSize: 11,
                                     color: AppColors.textGrey,
                                   ),
                                 ),
@@ -256,6 +243,14 @@ class _RegisterPageState extends State<RegisterPage> {
                                 onPressed: isLoading
                                     ? null
                                     : () => _handleRegister(context),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: Colors.white,
+                                  minimumSize: const Size.fromHeight(52),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                ),
                                 child: isLoading
                                     ? const SizedBox(
                                         height: 18,
@@ -273,7 +268,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                             'Daftar & Mulai Dapur Cerdas',
                                             style: GoogleFonts.poppins(
                                               fontWeight: FontWeight.w600,
-                                              fontSize: 13.5,
+                                              fontSize: 14,
                                             ),
                                           ),
                                         ],
@@ -292,7 +287,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             child: Text(
                               'ATAU DAFTAR INSTAN',
                               style: GoogleFonts.poppins(
-                                fontSize: 10.5,
+                                fontSize: 11,
                                 color: AppColors.textGrey,
                                 letterSpacing: 0.5,
                               ),
@@ -319,21 +314,29 @@ class _RegisterPageState extends State<RegisterPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                'G',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.redAccent,
+                              Container(
+                                width: 18,
+                                height: 18,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white,
+                                ),
+                                child: ClipOval(
+                                  child: Image.asset(
+                                    'assets/images/google.png',
+                                    width: 18,
+                                    height: 18,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: 10),
                               Text(
                                 'Lanjutkan dengan Google',
                                 style: GoogleFonts.poppins(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF374151),
+                                  color: AppColors.ink,
                                 ),
                               ),
                             ],
@@ -345,16 +348,16 @@ class _RegisterPageState extends State<RegisterPage> {
                         child: RichText(
                           text: TextSpan(
                             style: GoogleFonts.poppins(
-                              fontSize: 12.5,
-                              color: const Color(0xFF374151),
+                              fontSize: 13,
+                              color: AppColors.ink,
                             ),
                             children: [
-                              const TextSpan(text: 'Sudah memiliki akun? '),
+                              const TextSpan(text: 'Sudah punya akun Bunda? '),
                               TextSpan(
                                 text: 'Masuk di Sini',
                                 style: GoogleFonts.poppins(
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.primaryDark,
+                                  color: AppColors.primary,
                                 ),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () => Navigator.pushReplacement(
@@ -371,9 +374,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       const SizedBox(height: 8),
                       Center(
                         child: Text(
-                          'Data privasi keluarga terlindungi & terenkripsi aman',
+                          'Data akun disimpan aman untuk kenyamanan Bunda',
                           style: GoogleFonts.poppins(
-                            fontSize: 10.5,
+                            fontSize: 11,
                             color: AppColors.textGrey,
                           ),
                         ),
@@ -391,9 +394,9 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   TextStyle _labelStyle() => GoogleFonts.poppins(
-    fontSize: 12.5,
+    fontSize: 13,
     fontWeight: FontWeight.w600,
-    color: const Color(0xFF374151),
+    color: AppColors.ink,
   );
 
   InputDecoration _inputDecoration(String hint, IconData icon) =>
@@ -403,25 +406,29 @@ class _RegisterPageState extends State<RegisterPage> {
         prefixIcon: Icon(icon, size: 19, color: AppColors.textGrey),
         filled: true,
         fillColor: AppColors.bgGradientStart,
-        contentPadding: const EdgeInsets.symmetric(vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.border),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(
-            color: AppColors.primaryMedium,
-            width: 1.5,
+            color: AppColors.primary,
+            width: 2,
           ),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.redAccent),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.danger),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.danger, width: 2),
         ),
       );
 }

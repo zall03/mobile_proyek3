@@ -100,11 +100,19 @@ class _ChildProfileFormState extends State<ChildProfileForm> {
               const SizedBox(height: 8),
               GestureDetector(
                 onTap: () async {
+                  final now = DateTime.now();
+                  final today = DateTime(now.year, now.month, now.day);
+                  // Profil hanya menerima anak usia 0-1000 hari (HPK).
+                  final firstDate = today.subtract(const Duration(days: 1000));
+                  final initialDate = _selectedDate
+                      .copyWith(hour: 0, minute: 0, second: 0, millisecond: 0);
                   final date = await showDatePicker(
                     context: context,
-                    initialDate: _selectedDate,
-                    firstDate: DateTime(2015),
-                    lastDate: DateTime.now(),
+                    initialDate: initialDate.isBefore(firstDate)
+                        ? firstDate
+                        : (initialDate.isAfter(today) ? today : initialDate),
+                    firstDate: firstDate,
+                    lastDate: today,
                   );
                   if (date != null) {
                     setState(() => _selectedDate = date);

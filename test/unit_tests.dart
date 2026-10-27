@@ -7,7 +7,7 @@ void main() {
   group('ChildModel', () {
     test('fromJson creates Child with correct data', () {
       final json = {
-        'id': 1,
+        'id': 'a1b2c3d4-0000-0000-0000-000000000001',
         'name': 'Rayyan',
         'gender': 'male',
         'birth_date': '2024-03-15',
@@ -15,7 +15,7 @@ void main() {
 
       final model = ChildModel.fromJson(json);
 
-      expect(model.id, 1);
+      expect(model.id, 'a1b2c3d4-0000-0000-0000-000000000001');
       expect(model.name, 'Rayyan');
       expect(model.gender, 'male');
       expect(model.birthDate, DateTime(2024, 3, 15));
@@ -24,7 +24,7 @@ void main() {
     test('ageInYears calculates correctly', () {
       final birthDate = DateTime(2024, 1, 1);
       final model = ChildModel(
-        id: 1,
+        id: 'a1b2c3d4-0000-0000-0000-000000000002',
         name: 'Test',
         gender: 'male',
         birthDate: birthDate,
@@ -37,7 +37,7 @@ void main() {
 
     test('toJson serializes correctly', () {
       final model = ChildModel(
-        id: 1,
+        id: 'a1b2c3d4-0000-0000-0000-000000000003',
         name: 'Rayyan',
         gender: 'male',
         birthDate: DateTime(2024, 3, 15),
@@ -54,7 +54,7 @@ void main() {
   group('CookingLogModel', () {
     test('fromJson creates CookingLog with correct data', () {
       final json = {
-        'id': 1,
+        'id': 'da599c86-84a8-42c1-ae80-1a64854be999',
         'recipe_id': 5,
         'servings': 2,
         'cooked_at': '2026-09-18T10:30:00.000Z',
@@ -62,13 +62,13 @@ void main() {
 
       final model = CookingLogModel.fromJson(json);
 
-      expect(model.id, 1);
+      expect(model.id, 'da599c86-84a8-42c1-ae80-1a64854be999');
       expect(model.recipeId, 5);
       expect(model.servings, 2);
       expect(model.cookedAt.year, 2026);
     });
 
-    test('handles missing servings field (defaults to 1)', () {
+    test('handles numeric id and missing servings field', () {
       final json = {
         'id': 2,
         'recipe_id': 10,
@@ -77,6 +77,7 @@ void main() {
 
       final model = CookingLogModel.fromJson(json);
 
+      expect(model.id, '2');
       expect(model.servings, 1);
     });
   });

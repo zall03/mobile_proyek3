@@ -1,127 +1,148 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/config/app_config.dart';
 import '../../../../core/errors/exceptions.dart';
+import '../../domain/entities/register_outcome.dart';
+import '../models/user_model.dart';
 
+/// Autentikasi memakai Supabase Auth; profil pengguna dibaca dari backend Go.
 class AuthRemoteDatasource {
+  final SupabaseClient supabase;
   final Dio dio;
-  AuthRemoteDatasource(this.dio);
 
-  Future<Map<String, dynamic>> login({
+  AuthRemoteDatasource(this.supabase, this.dio);
+
+  Future<void> signIn({
     required String email,
     required String password,
   }) async {
     try {
-      final response = await dio.post(
-        '/login',
-        data: {'email': email, 'password': password},
-      );
-      return response.data['data'];
-    } on DioException catch (e) {
-      throw ServerException(_extractMessage(e));
+      await supabase.auth.signInWithPassword(email: email, password: password);
+    } on AuthException catch (e) {
+      throw ServerException(_authMessage(e));
     }
   }
 
-  Future<String> register({
+  Future<RegisterOutcome> register({
     required String name,
     required String email,
     required String password,
   }) async {
     try {
-      final response = await dio.post(
-        '/register',
-        data: {'name': name, 'email': email, 'password': password},
+      final response = await supabase.auth.signUp(
+        email: email,
+        password: password,
+        data: {'name': name},
       );
-      return response.data['data']['email'] as String;
-    } on DioException catch (e) {
-      throw ServerException(_extractMessage(e));
+      if (response.session == null) {
+        return RegisterOutcome(email: email);
+      }
+      return RegisterOutcome(user: await _me(), email: email);
+    } on AuthException catch (e) {
+      throw ServerException(_authMessage(e));
     }
   }
 
-  Future<Map<String, dynamic>> verifyOtp({
+  Future<void> verifyOtp({
     required String email,
     required String otpCode,
   }) async {
     try {
-      final response = await dio.post(
-        '/verify-otp',
-        data: {'email': email, 'otp_code': otpCode},
+      await supabase.auth.verifyOTP(
+        type: OtpType.signup,
+        email: email,
+        token: otpCode,
       );
-      return response.data['data'];
-    } on DioException catch (e) {
-      throw ServerException(_extractMessage(e));
+    } on AuthException catch (e) {
+      throw ServerException(_authMessage(e));
     }
   }
 
   Future<String> resendOtp({required String email}) async {
     try {
-      final response = await dio.post(
-        '/resend-otp',
-        data: {'email': email},
-      );
-      return response.data['message'].toString();
-    } on DioException catch (e) {
-      throw ServerException(_extractMessage(e));
+      await supabase.auth.resend(type: OtpType.signup, email: email);
+      return 'Kode verifikasi baru telah dikirim';
+    } on AuthException catch (e) {
+      throw ServerException(_authMessage(e));
     }
   }
 
-  Future<Map<String, dynamic>> googleSignIn({required String idToken}) async {
+  /// Memulai OAuth Google. Di web halaman dialihkan ke Google, jadi sesi baru
+  /// tersedia setelah aplikasi dimuat ulang. Di platform lain sesi menyusul
+  /// lewat deep link; kembalian `null` berarti belum ada sesi.
+  Future<UserModel?> signInWithGoogle() async {
     try {
-      final response = await dio.post(
-        '/auth/google',
-        data: {'id_token': idToken},
+      await supabase.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: kIsWeb ? null : AppConfig.oauthRedirect,
       );
-      return response.data['data'];
-    } on DioException catch (e) {
-      throw ServerException(_extractMessage(e));
+      if (supabase.auth.currentSession == null) return null;
+      return await _me();
+    } on AuthException catch (e) {
+      throw ServerException(_authMessage(e));
     }
   }
 
-  Future<Map<String, dynamic>> me() async {
-    try {
-      final response = await dio.get('/me');
-      return response.data['data'] as Map<String, dynamic>;
-    } on DioException catch (e) {
-      throw ServerException(_extractMessage(e));
-    }
-  }
+  Future<UserModel> me() => _me();
 
-  Future<Map<String, dynamic>> updateMe({required String name}) async {
+  Future<UserModel> updateMe({required String name}) async {
     try {
       final response = await dio.put('/me', data: {'name': name});
-      return response.data['data'] as Map<String, dynamic>;
+      return UserModel.fromJson(response.data['data'] as Map<String, dynamic>);
     } on DioException catch (e) {
-      throw ServerException(_extractMessage(e));
+      throw ServerException(_dioMessage(e));
     }
   }
 
   Future<void> changePassword({
     required String currentPassword,
     required String newPassword,
-    required String newPasswordConfirmation,
   }) async {
     try {
-      await dio.post('/change-password', data: {
-        'current_password': currentPassword,
-        'new_password': newPassword,
-        'new_password_confirmation': newPasswordConfirmation,
-      });
-    } on DioException catch (e) {
-      throw ServerException(_extractMessage(e));
+      final email = supabase.auth.currentUser?.email;
+      if (email == null) {
+        throw ServerException('Sesi tidak ditemukan, masuk ulang');
+      }
+      // Supabase tidak memverifikasi sandi lama, jadi dicek dengan masuk ulang.
+      await supabase.auth.signInWithPassword(
+        email: email,
+        password: currentPassword,
+      );
+      await supabase.auth.updateUser(UserAttributes(password: newPassword));
+    } on AuthException catch (e) {
+      throw ServerException(_authMessage(e));
     }
   }
 
-  Future<void> logout() async {
+  Future<void> signOut() async {
     try {
-      await dio.post('/logout');
-    } on DioException catch (e) {
-      throw ServerException(_extractMessage(e));
+      await supabase.auth.signOut();
+    } on AuthException catch (e) {
+      throw ServerException(_authMessage(e));
     }
   }
 
-  String _extractMessage(DioException e) {
+  Future<UserModel> _me() async {
+    try {
+      final response = await dio.get('/me');
+      return UserModel.fromJson(response.data['data'] as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ServerException(_dioMessage(e));
+    }
+  }
+
+  String _authMessage(AuthException e) {
+    final message = e.message.trim();
+    return message.isEmpty ? 'Autentikasi gagal, coba lagi' : message;
+  }
+
+  String _dioMessage(DioException e) {
     final data = e.response?.data;
-    if (data is Map && data['message'] != null)
+    if (data is Map && data['message'] != null) {
       return data['message'].toString();
+    }
     if (data is Map && data['errors'] != null) {
       final errors = data['errors'] as Map;
       return errors.values.first[0].toString();

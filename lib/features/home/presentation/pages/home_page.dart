@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/ingredient_image.dart';
 import '../../../../injection_container.dart';
 import '../../../child/domain/entities/child.dart';
 import '../../../auth/presentation/pages/profile_page.dart';
 import '../../../child/presentation/pages/child_list_page.dart';
 import '../../../notifications/presentation/pages/notifications_page.dart';
+import '../../../recipe/domain/entities/recipe_audience.dart';
 import '../../../recipe/presentation/pages/ai_recipe_result_page.dart';
 import '../../../recipe/presentation/pages/recipe_list_page.dart';
 import '../../../stock/domain/entities/stock.dart';
@@ -15,6 +17,7 @@ import '../../../stock/presentation/cubit/stock_cubit.dart';
 import '../../../stock/presentation/cubit/stock_state.dart';
 import '../../../stock/presentation/pages/stock_page.dart';
 import '../../../stock/presentation/widgets/add_stock_sheet.dart';
+import '../../../cooking_log/presentation/pages/cooking_history_page.dart';
 import '../../../nutrition/presentation/pages/nutrition_page.dart';
 import '../../domain/entities/dashboard_summary.dart';
 import '../cubit/home_cubit.dart';
@@ -22,8 +25,14 @@ import '../cubit/home_state.dart';
 
 // Design Read: maternal kitchen companion for Indonesian mothers
 // Dial: ENERGY 2 / RHYTHM 2 / MOTION 1
-// Palette: deep leaf green #1B5E20 primary, warm amber #FB8C00 accent, soft mint bg
+// Palette: deep forest green #0F3D1E to #176B2C primary, warm amber #F79500 accent, soft mint bg #F2F9F2
 // Type: Playfair Display for warm editorial greeting, Plus Jakarta Sans for body
+// Ink scale: #202833 primary, #3A5A42 secondary, #68747D muted, #176B2C green action.
+// Radius scale: 28 hero band, 18-20 banner + cards, 14 controls, 9999 status chips.
+// Hero band gradient exists to lift the greeting above the white cards (hierarchy level 1);
+//   the AI block is a flat mint tint instead of a second gradient (hierarchy level 2).
+// Motif: one oversized tinted kitchen icon bleeding off the top-right corner of the two
+//   major blocks (leaf on the hero, pot on the AI banner) as the recurring identity gesture.
 
 class HomePage extends StatelessWidget {
   final String userName;
@@ -49,11 +58,8 @@ class _HomeContent extends StatefulWidget {
 }
 
 class _HomeContentState extends State<_HomeContent> {
-  int _navIndex = 0;
-
   void _onNavTap(int index) {
     if (index == 0) {
-      setState(() => _navIndex = 0);
       context.read<HomeCubit>().loadDashboard();
       return;
     }
@@ -84,15 +90,14 @@ class _HomeContentState extends State<_HomeContent> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<HomeCubit, HomeState>(
-      listener: (context, state) {},
+    return BlocBuilder<HomeCubit, HomeState>(
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: const Color(0xFFF6F8F6),
+          backgroundColor: AppColors.bgGradientStart,
           appBar: _buildAppBar(context, state),
           body: RefreshIndicator(
             onRefresh: () => context.read<HomeCubit>().loadDashboard(),
-            color: const Color(0xFF1B5E20),
+            color: AppColors.primary,
             child: state.when(
               initial: () => _buildLoading(),
               loading: () => _buildLoading(),
@@ -130,37 +135,43 @@ class _HomeContentState extends State<_HomeContent> {
           Container(
             width: 36,
             height: 36,
-            decoration: BoxDecoration(
-              image: const DecorationImage(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
                 image: AssetImage('assets/images/logo.png'),
                 fit: BoxFit.contain,
               ),
             ),
           ),
           const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Dapur Cerdas',
-                style: GoogleFonts.playfairDisplay(
-                  color: const Color(0xFF1B5E20),
-                  fontWeight: FontWeight.w800,
-                  fontSize: 16,
-                  height: 1,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Dapur Cerdas',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.playfairDisplay(
+                    color: const Color(0xFF1B5E20),
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                    height: 1,
+                  ),
                 ),
-              ),
-              Text(
-                'Beranda',
-                style: GoogleFonts.plusJakartaSans(
-                  color: const Color(0xFF9CA3AF),
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  height: 1.2,
+                Text(
+                  'Beranda',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    color: const Color(0xFF6B7280),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    height: 1.2,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -171,7 +182,7 @@ class _HomeContentState extends State<_HomeContent> {
             IconButton(
               icon: const Icon(
                 Icons.notifications_none_rounded,
-                color: Color(0xFF263238),
+                color: Color(0xFF111827),
                 size: 24,
               ),
               onPressed: () => Navigator.push(
@@ -184,8 +195,14 @@ class _HomeContentState extends State<_HomeContent> {
                 right: 6,
                 top: 6,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                  constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 2,
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFEF4444),
                     borderRadius: BorderRadius.circular(10),
@@ -194,7 +211,12 @@ class _HomeContentState extends State<_HomeContent> {
                   child: Text(
                     expiringCount > 9 ? '9+' : '$expiringCount',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.w800, color: Colors.white, height: 1),
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      height: 1,
+                    ),
                   ),
                 ),
               ),
@@ -203,12 +225,18 @@ class _HomeContentState extends State<_HomeContent> {
         Padding(
           padding: const EdgeInsets.only(right: 16, left: 4),
           child: InkWell(
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfilePage())),
-            borderRadius: BorderRadius.circular(16),
-            child: const CircleAvatar(
-              radius: 16,
-              backgroundColor: Color(0xFFE8F5E9),
-              child: Icon(Icons.person, color: Color(0xFF1B5E20), size: 16),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ProfilePage()),
+            ),
+            borderRadius: BorderRadius.circular(22),
+            child: const Padding(
+              padding: EdgeInsets.all(6),
+              child: CircleAvatar(
+                radius: 16,
+                backgroundColor: Color(0xFFE8F5E9),
+                child: Icon(Icons.person, color: Color(0xFF1B5E20), size: 16),
+              ),
             ),
           ),
         ),
@@ -221,7 +249,9 @@ class _HomeContentState extends State<_HomeContent> {
       physics: AlwaysScrollableScrollPhysics(),
       child: SizedBox(
         height: 400,
-        child: Center(child: CircularProgressIndicator(color: Color(0xFF1B5E20))),
+        child: Center(
+          child: CircularProgressIndicator(color: Color(0xFF1B5E20)),
+        ),
       ),
     );
   }
@@ -233,7 +263,7 @@ class _HomeContentState extends State<_HomeContent> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, color: Colors.red, size: 48),
+            const Icon(Icons.error_outline, color: Color(0xFFDC2626), size: 48),
             const SizedBox(height: 12),
             Text(
               'Gagal memuat data',
@@ -307,7 +337,7 @@ class _HomeContentState extends State<_HomeContent> {
             ),
           ),
           const SizedBox(height: 16),
-          _DailyTipCard(childName: firstChild?.name),
+          const _DailyTipCard(),
         ],
       ),
     );
@@ -335,26 +365,26 @@ class _HomeContentState extends State<_HomeContent> {
             _NavItem(
               icon: Icons.home_rounded,
               label: 'Beranda',
-              active: _navIndex == 0,
+              active: true,
               onTap: () => _onNavTap(0),
             ),
             _NavItem(
               icon: Icons.inventory_2_outlined,
               label: 'Stok Kulkas',
-              active: _navIndex == 1,
+              active: false,
               onTap: () => _onNavTap(1),
             ),
             const SizedBox(width: 48),
             _NavItem(
               icon: Icons.show_chart_rounded,
               label: 'Nutrisi',
-              active: _navIndex == 3,
+              active: false,
               onTap: () => _onNavTap(3),
             ),
             _NavItem(
               icon: Icons.face_rounded,
               label: 'Si Kecil',
-              active: _navIndex == 4,
+              active: false,
               onTap: () => _onNavTap(4),
             ),
           ],
@@ -381,11 +411,11 @@ class _HomeContentState extends State<_HomeContent> {
   Widget _buildFab() {
     return FloatingActionButton(
       onPressed: () => _onNavTap(2),
-      backgroundColor: const Color(0xFFFB8C00),
+      backgroundColor: AppColors.accentOrange,
       foregroundColor: Colors.white,
       elevation: 4,
       shape: const CircleBorder(),
-      child: const Icon(Icons.auto_awesome, size: 24),
+      child: const Icon(Icons.soup_kitchen_rounded, size: 24),
     );
   }
 }
@@ -441,7 +471,7 @@ class _HomeHeroBand extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF1B5E20), Color(0xFF388E3C)],
+          colors: [AppColors.primaryDeep, AppColors.primary],
         ),
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
       ),
@@ -451,11 +481,7 @@ class _HomeHeroBand extends StatelessWidget {
           const Positioned(
             right: -18,
             top: -18,
-            child: Icon(
-              Icons.eco_rounded,
-              size: 130,
-              color: Colors.white10,
-            ),
+            child: Icon(Icons.eco_rounded, size: 130, color: Colors.white10),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -540,7 +566,10 @@ class _HomeHeroBand extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: _HeroStatTile(label: 'Total Bahan', value: '$statTotal'),
+                    child: _HeroStatTile(
+                      label: 'Total Bahan',
+                      value: '$statTotal',
+                    ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -586,34 +615,37 @@ class _HeroStatTile extends StatelessWidget {
     final bg = emphasize
         ? const Color(0xFFFFFFFF).withValues(alpha: 0.95)
         : warn
-            ? const Color(0xFFFEF3C7).withValues(alpha: 0.28)
-            : const Color(0xFFFFFFFF).withValues(alpha: 0.14);
+        ? const Color(0xFFFEF3C7)
+        : const Color(0xFFFFFFFF).withValues(alpha: 0.14);
     final valueColor = emphasize
         ? const Color(0xFF1B5E20)
         : warn
-            ? const Color(0xFFFFE082)
-            : Colors.white;
+        ? const Color(0xFF92400E)
+        : Colors.white;
     final labelColor = emphasize
-        ? const Color(0xFF4B5563)
+        ? const Color(0xFF374151)
         : warn
-            ? const Color(0xFFFFF3CD)
-            : Colors.white.withValues(alpha: 0.85);
+        ? const Color(0xFF78350F)
+        : Colors.white.withValues(alpha: 0.85);
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            value,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              color: valueColor,
-              height: 1.1,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: valueColor,
+                height: 1.1,
+              ),
             ),
           ),
           const SizedBox(height: 3),
@@ -687,6 +719,7 @@ class _AiSheetBody extends StatefulWidget {
 
 class _AiSheetBodyState extends State<_AiSheetBody> {
   final Set<int> _selected = {};
+  RecipeAudience _audience = RecipeAudience.family;
 
   void _toggle(int id) {
     setState(() {
@@ -701,14 +734,20 @@ class _AiSheetBodyState extends State<_AiSheetBody> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => AiRecipeResultPage(ingredientIds: _selected.toList()),
+        builder: (_) => AiRecipeResultPage(
+          ingredientIds: _selected.toList(),
+          audience: _audience,
+        ),
       ),
     );
   }
 
   void _goToStock(BuildContext context) {
     Navigator.pop(context);
-    Navigator.push(context, MaterialPageRoute(builder: (_) => const StockPage()));
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const StockPage()),
+    );
   }
 
   @override
@@ -719,7 +758,16 @@ class _AiSheetBodyState extends State<_AiSheetBody> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 12),
-          Center(child: Container(width: 36, height: 4, decoration: BoxDecoration(color: const Color(0xFFE5E7EB), borderRadius: BorderRadius.circular(4)))),
+          Center(
+            child: Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE5E7EB),
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ),
           const SizedBox(height: 12),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -728,19 +776,132 @@ class _AiSheetBodyState extends State<_AiSheetBody> {
                 Container(
                   width: 36,
                   height: 36,
-                  decoration: BoxDecoration(color: const Color(0xFFFFF3E0), borderRadius: BorderRadius.circular(10)),
-                  child: const Icon(Icons.auto_awesome, size: 18, color: Color(0xFFFB8C00)),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF3E0),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.soup_kitchen_rounded,
+                    size: 18,
+                    color: Color(0xFFB45309),
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Tanya AI Dapur', style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700, color: const Color(0xFF111827))),
-                      Text('Pilih bahan dari kulkasmu, AI akan racik resepnya.', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: const Color(0xFF6B7280))),
+                      Text(
+                        'Racik Resep dengan AI',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF111827),
+                        ),
+                      ),
+                      Text(
+                        'Pilih bahan dari kulkasmu, AI akan racik resepnya.',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12,
+                          color: const Color(0xFF6B7280),
+                        ),
+                      ),
                     ],
                   ),
                 ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Untuk siapa resep ini?',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF374151),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: RecipeAudience.values
+                      .map(
+                        (audience) => ChoiceChip(
+                          label: Text(
+                            audience.label,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11,
+                              fontWeight: _audience == audience
+                                  ? FontWeight.w700
+                                  : FontWeight.w600,
+                            ),
+                          ),
+                          selected: _audience == audience,
+                          onSelected: (_) {
+                            setState(() {
+                              _audience = audience;
+                            });
+                          },
+                          selectedColor: const Color(0xFFE8F5E9),
+                          labelStyle: TextStyle(
+                            color: _audience == audience
+                                ? const Color(0xFF1B5E20)
+                                : const Color(0xFF374151),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(
+                              color: _audience == audience
+                                  ? const Color(0xFF1B5E20)
+                                  : const Color(0xFFE5E7EB),
+                            ),
+                          ),
+                          backgroundColor: Colors.white,
+                        ),
+                      )
+                      .toList(),
+                ),
+                if (_audience != RecipeAudience.family &&
+                    _audience.restrictions.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF7ED),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0xFFFED7AA)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Pantangan otomatis',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF9A3412),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _audience.restrictions.join(' • '),
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10,
+                            height: 1.4,
+                            color: const Color(0xFF9A3412),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -749,7 +910,9 @@ class _AiSheetBodyState extends State<_AiSheetBody> {
             child: BlocBuilder<StockCubit, StockState>(
               builder: (context, state) {
                 if (state is StockLoading) {
-                  return const Center(child: CircularProgressIndicator(color: Color(0xFF1B5E20)));
+                  return const Center(
+                    child: CircularProgressIndicator(color: Color(0xFF1B5E20)),
+                  );
                 }
                 if (state is StockFailure) {
                   return _AiSheetError(
@@ -761,23 +924,75 @@ class _AiSheetBodyState extends State<_AiSheetBody> {
                   if (state.stocks.isEmpty) {
                     return _AiSheetEmpty(onAddStock: () => _goToStock(context));
                   }
-                  final ingredients = <int, String>{};
+                  final groups = <String, Map<int, String>>{};
+                  final order = <String, int>{};
                   for (final stock in state.stocks) {
-                    ingredients[stock.ingredient.id] = stock.ingredient.name;
+                    final raw = stock.ingredient.categoryName;
+                    final label =
+                        (raw == null || raw.isEmpty) ? 'Lainnya' : raw;
+                    groups
+                        .putIfAbsent(label, () => {})
+                        .putIfAbsent(
+                          stock.ingredient.id,
+                          () => stock.ingredient.name,
+                        );
+                    order.putIfAbsent(label, () => stock.ingredient.categoryId);
                   }
-                  final entries = ingredients.entries.toList();
+                  final labels = groups.keys.toList()
+                    ..sort((a, b) {
+                      if (a == 'Lainnya') return 1;
+                      if (b == 'Lainnya') return -1;
+                      return order[a]!.compareTo(order[b]!);
+                    });
                   return SingleChildScrollView(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: entries.map((e) {
-                        return _AiSelectChip(
-                          label: e.value,
-                          selected: _selected.contains(e.key),
-                          onTap: () => _toggle(e.key),
-                        );
-                      }).toList(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (final label in labels)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      label,
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xFF374151),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      '${groups[label]!.length} bahan',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 11,
+                                        color: const Color(0xFF6B7280),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: [
+                                    for (final entry in groups[label]!.entries)
+                                      _AiSelectChip(
+                                        label: entry.value,
+                                        selected:
+                                            _selected.contains(entry.key),
+                                        onTap: () => _toggle(entry.key),
+                                      ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
                     ),
                   );
                 }
@@ -805,11 +1020,17 @@ class _AiSheetBodyState extends State<_AiSheetBody> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: _selected.isEmpty ? null : () => _buildRecipe(context),
-                    icon: const Icon(Icons.auto_awesome, size: 18),
+                    onPressed: _selected.isEmpty
+                        ? null
+                        : () => _buildRecipe(context),
+                    icon: const Icon(Icons.soup_kitchen_rounded, size: 18),
                     label: Text(
-                      _selected.isEmpty ? 'Pilih Bahan Dulu' : 'Buat Resep dengan AI',
-                      style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+                      _selected.isEmpty
+                          ? 'Pilih Bahan Dulu'
+                          : 'Buat Resep dengan AI',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF1B5E20),
@@ -817,7 +1038,9 @@ class _AiSheetBodyState extends State<_AiSheetBody> {
                       disabledBackgroundColor: const Color(0xFFE5E7EB),
                       disabledForegroundColor: const Color(0xFF9CA3AF),
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),
@@ -844,22 +1067,30 @@ class _AiSheetError extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, color: Colors.red, size: 40),
+            const Icon(Icons.error_outline, color: Color(0xFFDC2626), size: 40),
             const SizedBox(height: 12),
             Text(
               'Gagal memuat stok kulkas',
-              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600, color: const Color(0xFF263238)),
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF111827),
+              ),
             ),
             const SizedBox(height: 6),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: GoogleFonts.plusJakartaSans(fontSize: 12, color: const Color(0xFF6B7280)),
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12,
+                color: const Color(0xFF6B7280),
+              ),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: onRetry,
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1B5E20)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1B5E20),
+              ),
               child: const Text('Coba Lagi'),
             ),
           ],
@@ -882,22 +1113,34 @@ class _AiSheetEmpty extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.kitchen_outlined, color: Color(0xFF9CA3AF), size: 44),
+            const Icon(
+              Icons.kitchen_outlined,
+              color: Color(0xFF6B7280),
+              size: 44,
+            ),
             const SizedBox(height: 12),
             Text(
               'Kulkas masih kosong',
-              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600, color: const Color(0xFF263238)),
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF111827),
+              ),
             ),
             const SizedBox(height: 6),
             Text(
               'Tambahkan dulu bahan di stok kulkas agar AI bisa meracik resep.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.plusJakartaSans(fontSize: 12, color: const Color(0xFF6B7280)),
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12,
+                color: const Color(0xFF6B7280),
+              ),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: onAddStock,
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFB8C00)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1B5E20),
+              ),
               child: const Text('Tambah Stok'),
             ),
           ],
@@ -972,7 +1215,7 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = active ? const Color(0xFF1B5E20) : const Color(0xFF9CA3AF);
+    final color = active ? const Color(0xFF1B5E20) : const Color(0xFF6B7280);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -983,12 +1226,16 @@ class _NavItem extends StatelessWidget {
           children: [
             Icon(icon, size: 22, color: color),
             const SizedBox(height: 3),
-            Text(
-              label,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 10,
-                fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                color: color,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                maxLines: 1,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 10,
+                  fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                  color: color,
+                ),
               ),
             ),
           ],
@@ -1008,7 +1255,7 @@ class _FridgeAlertCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFE8EDE9)),
         boxShadow: [
           BoxShadow(
@@ -1035,7 +1282,7 @@ class _FridgeAlertCard extends StatelessWidget {
                 child: const Icon(
                   Icons.warning_amber_rounded,
                   size: 16,
-                  color: Color(0xFFD97706),
+                  color: Color(0xFFB45309),
                 ),
               ),
               const SizedBox(width: 8),
@@ -1060,9 +1307,9 @@ class _FridgeAlertCard extends StatelessWidget {
                           width: 6,
                           height: 6,
                           decoration: BoxDecoration(
-                            color: items.isEmpty
-                                ? const Color(0xFF22C55E)
-                                : const Color(0xFFEF4444),
+                          color: items.isEmpty
+                              ? const Color(0xFF15803D)
+                              : const Color(0xFFDC2626),
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -1091,29 +1338,29 @@ class _FridgeAlertCard extends StatelessWidget {
                   context,
                   MaterialPageRoute(builder: (_) => const NotificationsPage()),
                 ),
-                borderRadius: BorderRadius.circular(8),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 4,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Lihat Selengkapnya',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF16A34A),
+                borderRadius: BorderRadius.circular(12),
+                child: SizedBox(
+                  height: 44,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Lihat Selengkapnya',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF15803D),
+                          ),
                         ),
-                      ),
-                      const Icon(
-                        Icons.arrow_forward_ios,
-                        size: 10,
-                        color: Color(0xFF16A34A),
-                      ),
-                    ],
+                        const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 10,
+                          color: Color(0xFF15803D),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -1136,14 +1383,14 @@ class _FridgeAlertCard extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: const Color(0xFFF0FDF4),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
                   const Icon(
                     Icons.check_circle,
                     size: 18,
-                    color: Color(0xFF16A34A),
+                    color: Color(0xFF15803D),
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -1231,15 +1478,37 @@ class _AIRecipeBanner extends StatelessWidget {
   final String? childName;
   const _AIRecipeBanner({this.childName});
 
+  Widget _historyLink(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: TextButton.icon(
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const CookingHistoryPage()),
+        ),
+        style: TextButton.styleFrom(
+          foregroundColor: const Color(0xFF111827),
+          minimumSize: const Size(0, 44),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+        ),
+        icon: const Icon(Icons.history, size: 16),
+        label: Text(
+          'Riwayat memasak',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFFDE68A), Color(0xFFBBF7D0)],
-        ),
+        color: const Color(0xFFECFDF5),
+        border: Border.all(color: const Color(0xFFA7F3D0)),
         borderRadius: BorderRadius.circular(20),
       ),
       padding: const EdgeInsets.all(18),
@@ -1251,7 +1520,7 @@ class _AIRecipeBanner extends StatelessWidget {
             child: Icon(
               Icons.soup_kitchen_rounded,
               size: 96,
-              color: Colors.white70,
+              color: Color(0xFFD1FAE5),
             ),
           ),
           Column(
@@ -1273,7 +1542,7 @@ class _AIRecipeBanner extends StatelessWidget {
                     : 'AI otomatis menyesuaikan stok kulkas dengan target nutrisi harian $childName.',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
-                  color: const Color(0xFF1F2937),
+                  color: const Color(0xFF111827),
                   height: 1.4,
                 ),
               ),
@@ -1285,7 +1554,7 @@ class _AIRecipeBanner extends StatelessWidget {
                     context,
                     MaterialPageRoute(builder: (_) => const RecipeListPage()),
                   ),
-                  icon: const Icon(Icons.auto_awesome, size: 18),
+                  icon: const Icon(Icons.soup_kitchen_rounded, size: 18),
                   label: Text(
                     'Racik Resep Sekarang',
                     style: GoogleFonts.plusJakartaSans(
@@ -1304,33 +1573,7 @@ class _AIRecipeBanner extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () async {
-                    final saved = await showAddStockSheet(context);
-                    if (saved == true && context.mounted) {
-                      context.read<HomeCubit>().loadDashboard();
-                    }
-                  },
-                  icon: const Icon(Icons.add, size: 18),
-                  label: Text(
-                    'Tambah Bahan',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF1B5E20),
-                    side: const BorderSide(color: Color(0xFF1B5E20), width: 1.2),
-                    padding: const EdgeInsets.symmetric(vertical: 13),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ),
+              _historyLink(context),
             ],
           ),
         ],
@@ -1357,18 +1600,23 @@ class _InventorySection extends StatelessWidget {
       children: [
         _SectionHeader(
           icon: Icons.kitchen_rounded,
-          iconColor: const Color(0xFF16A34A),
+          iconColor: const Color(0xFF15803D),
           iconBg: const Color(0xFFDCFCE7),
           title: 'Ringkasan Bahan Kulkas',
           trailing: InkWell(
             onTap: onAddStock,
             borderRadius: BorderRadius.circular(16),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1B5E20),
-                borderRadius: BorderRadius.circular(16),
-              ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 7,
+                ),
+                constraints: const BoxConstraints(minHeight: 44),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1B5E20),
+                  borderRadius: BorderRadius.circular(16),
+                ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -1400,15 +1648,16 @@ class _InventorySection extends StatelessWidget {
             ),
             children: summary.recentStocks.map((s) {
               final isExpiring =
-                  s.status == StockStatus.expiring || s.status == StockStatus.expired;
+                  s.status == StockStatus.expiring ||
+                  s.status == StockStatus.expired;
               return _InvCard(
-                icon:
-                    isExpiring ? Icons.warning_amber_rounded : Icons.egg_alt,
+                icon: isExpiring ? Icons.warning_amber_rounded : Icons.egg_alt,
                 imageUrl: s.ingredient.imageUrl,
                 title: s.ingredient.name,
                 subtitle:
                     '${s.quantity.toStringAsFixed(s.quantity % 1 == 0 ? 0 : 1)} ${s.unit}${s.expiryDate != null ? ' • ${_shortDate(s.expiryDate!)}' : ''}',
                 highlight: isExpiring,
+                onTap: onOpenStock,
               );
             }).toList(),
           )
@@ -1426,28 +1675,28 @@ class _InventorySection extends StatelessWidget {
               child: InkWell(
                 onTap: onOpenStock,
                 borderRadius: BorderRadius.circular(8),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 6,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Lihat Semua ${summary.totalStocks} Bahan',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF16A34A),
+                child: SizedBox(
+                  height: 44,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Lihat Semua ${summary.totalStocks} Bahan',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF15803D),
+                          ),
                         ),
-                      ),
-                      const Icon(
-                        Icons.arrow_forward_ios,
-                        size: 10,
-                        color: Color(0xFF16A34A),
-                      ),
-                    ],
+                        const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 10,
+                          color: Color(0xFF15803D),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -1489,11 +1738,11 @@ class _InventoryEmpty extends StatelessWidget {
                   height: 44,
                   decoration: BoxDecoration(
                     color: const Color(0xFFDCFCE7),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
                     Icons.inventory_2_outlined,
-                    color: Color(0xFF16A34A),
+                    color: Color(0xFF15803D),
                     size: 22,
                   ),
                 ),
@@ -1519,7 +1768,7 @@ class _InventoryEmpty extends StatelessWidget {
                       vertical: 10,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   child: Text(
@@ -1540,11 +1789,11 @@ class _InventoryEmpty extends StatelessWidget {
                   height: 44,
                   decoration: BoxDecoration(
                     color: const Color(0xFFFEF3C7),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
                     Icons.kitchen_outlined,
-                    color: Color(0xFFD97706),
+                    color: Color(0xFFB45309),
                     size: 22,
                   ),
                 ),
@@ -1584,7 +1833,7 @@ class _InventoryEmpty extends StatelessWidget {
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                   ),
@@ -1601,79 +1850,113 @@ class _InvCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final bool highlight;
+  final VoidCallback? onTap;
   const _InvCard({
     required this.icon,
     this.imageUrl,
     required this.title,
     required this.subtitle,
     this.highlight = false,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final image = imageUrl;
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: highlight ? const Color(0xFFFECACA) : const Color(0xFFF3F4F6)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (image == null || image.isEmpty)
-            Icon(icon, size: 20, color: highlight ? const Color(0xFFDC2626) : const Color(0xFF16A34A))
-          else
-            IngredientImage(
-              imageUrl: image,
-              name: title,
-              size: 32,
-              borderRadius: 8,
-            ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF111827),
-            ),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: highlight ? const Color(0xFFFEF2F2) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: highlight ? const Color(0xFFFCA5A5) : const Color(0xFFF3F4F6),
           ),
-          const SizedBox(height: 2),
-          Text(
-            subtitle,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 11,
-              color: const Color(0xFF6B7280),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (image == null || image.isEmpty)
+              Icon(
+                icon,
+                size: 20,
+                color: highlight
+                    ? const Color(0xFFDC2626)
+                    : const Color(0xFF15803D),
+              )
+            else
+              IngredientImage(
+                imageUrl: image,
+                name: title,
+                size: 32,
+                borderRadius: 8,
+              ),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF111827),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11,
+                color: highlight
+                    ? const Color(0xFFB91C1C)
+                    : const Color(0xFF6B7280),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
 class _DailyTipCard extends StatelessWidget {
-  final String? childName;
-  const _DailyTipCard({this.childName});
+  const _DailyTipCard();
+
+  static const _tips = [
+    'Variasikan protein hewani sepanjang minggu: telur, ikan, dan daging bergantian.',
+    'Cek kedaluwarsa tiap awal minggu, lalu olah bahan yang paling dulu habis.',
+    'Sisipkan satu sayuran berwarna hijau tua di menu hari ini untuk zat besi si kecil.',
+    'Olah sisa lauk semalam jadi sarapan, supaya bahan di kulkas tidak terbuang.',
+    'Bumbui dengan rempah dan perasan jeruk dulu sebelum menambah garam dapur.',
+    'Padukan karbohidrat utuh seperti beras merah atau kacang hijau di menu keluarga.',
+    'Tawarkan camilan buah potong di sela makan, bukan camilan manis kemasan.',
+  ];
+
   @override
   Widget build(BuildContext context) {
+    final tip = _tips[DateTime.now().weekday - 1];
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: const Color(0xFFFFFBEB), borderRadius: BorderRadius.circular(14), border: Border.all(color: const Color(0xFFFDE68A))),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFBEB),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFFDE68A)),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             width: 32,
             height: 32,
-            decoration: BoxDecoration(color: const Color(0xFFF59E0B), borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(
+              color: const Color(0xFFB45309),
+              borderRadius: BorderRadius.circular(8),
+            ),
             child: const Icon(Icons.lightbulb, size: 18, color: Colors.white),
           ),
           const SizedBox(width: 12),
@@ -1681,13 +1964,22 @@ class _DailyTipCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Tips Hari Ini', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFF92400E))),
+                Text(
+                  'Tips Hari Ini',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF92400E),
+                  ),
+                ),
                 const SizedBox(height: 4),
                 Text(
-                  childName == null
-                      ? 'Variasikan protein hewani setiap hari dan jadwalkan cek kedaluwarsa tiap minggu.'
-                      : 'Untuk ${childName ?? 'si kecil'}, pastikan 1 sumber protein hewani di tiap makan utama.',
-                  style: GoogleFonts.plusJakartaSans(fontSize: 12, color: const Color(0xFF78350F), height: 1.4),
+                  tip,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    color: const Color(0xFF78350F),
+                    height: 1.4,
+                  ),
                 ),
               ],
             ),
