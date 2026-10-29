@@ -107,17 +107,19 @@ class _AddStockSheetContentState extends State<_AddStockSheetContent> {
       return;
     }
     context.read<StockCubit>().addStock(
-          ingredientId: _selectedIngredient!.id,
-          quantity: quantity,
-          unit: _unitController.text.trim(),
-          expiryDate: _selectedDate,
-        );
+      ingredientId: _selectedIngredient!.id,
+      quantity: quantity,
+      unit: _unitController.text.trim(),
+      expiryDate: _selectedDate,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       child: FractionallySizedBox(
         heightFactor: 0.9,
         child: BlocConsumer<StockCubit, StockState>(
@@ -187,8 +189,14 @@ class _AddStockSheetContentState extends State<_AddStockSheetContent> {
                         ),
                       ),
                       IconButton(
-                        onPressed: isLoading ? null : () => Navigator.pop(context),
-                        icon: const Icon(Icons.close, size: 20, color: Color(0xFF6B7280)),
+                        onPressed: isLoading
+                            ? null
+                            : () => Navigator.pop(context),
+                        icon: const Icon(
+                          Icons.close,
+                          size: 20,
+                          color: Color(0xFF6B7280),
+                        ),
                       ),
                     ],
                   ),
@@ -204,13 +212,17 @@ class _AddStockSheetContentState extends State<_AddStockSheetContent> {
                         const SizedBox(height: 8),
                         TextField(
                           controller: _searchController,
-                          decoration: _inputDecoration('Cari bahan...', withSearchIcon: true),
+                          decoration: _inputDecoration(
+                            'Cari bahan...',
+                            withSearchIcon: true,
+                          ),
                         ),
                         if (_selectedIngredient != null) ...[
                           const SizedBox(height: 10),
                           _SelectedIngredientTile(
                             ingredient: _selectedIngredient!,
-                            onRemove: () => setState(() => _selectedIngredient = null),
+                            onRemove: () =>
+                                setState(() => _selectedIngredient = null),
                           ),
                         ],
                         _buildSearchResults(),
@@ -224,9 +236,10 @@ class _AddStockSheetContentState extends State<_AddStockSheetContent> {
                               flex: 3,
                               child: TextField(
                                 controller: _quantityController,
-                                keyboardType: const TextInputType.numberWithOptions(
-                                  decimal: true,
-                                ),
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
                                 decoration: _inputDecoration('Contoh: 500'),
                               ),
                             ),
@@ -269,7 +282,8 @@ class _AddStockSheetContentState extends State<_AddStockSheetContent> {
                                 Expanded(
                                   child: Text(
                                     _selectedDate != null
-                                        ? DateFormat('dd/MM/yyyy').format(_selectedDate!)
+                                        ? DateFormat('dd/MM/yyyy')
+                                              .format(_selectedDate!)
                                         : 'Tanpa tanggal kedaluwarsa',
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 13.5,
@@ -281,7 +295,8 @@ class _AddStockSheetContentState extends State<_AddStockSheetContent> {
                                 ),
                                 if (_selectedDate != null)
                                   IconButton(
-                                    onPressed: () => setState(() => _selectedDate = null),
+                                    onPressed: () =>
+                                        setState(() => _selectedDate = null),
                                     icon: const Icon(
                                       Icons.close,
                                       size: 18,

@@ -9,10 +9,7 @@ class GetStocksUsecase {
 
   GetStocksUsecase(this.repository);
 
-  Future<Either<Failure, List<Stock>>> call({
-    int? categoryId,
-    String? status,
-  }) {
+  Future<Either<Failure, List<Stock>>> call({int? categoryId, String? status}) {
     return repository.getStocks(categoryId: categoryId, status: status);
   }
 }

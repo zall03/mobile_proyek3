@@ -259,7 +259,10 @@ class _GiziRingCard extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             'Sesuai Standar WHO',
-            style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppColors.textGrey),
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 11,
+              color: AppColors.textGrey,
+            ),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -276,7 +279,9 @@ class _GiziRingCard extends StatelessWidget {
                     strokeWidth: 12,
                     strokeCap: StrokeCap.round,
                     backgroundColor: const Color(0xFFE8F5E9),
-                    valueColor: const AlwaysStoppedAnimation(AppColors.primaryMedium),
+                    valueColor: const AlwaysStoppedAnimation(
+                      AppColors.primaryMedium,
+                    ),
                   ),
                 ),
                 Column(
@@ -382,7 +387,10 @@ class _SectionSub extends StatelessWidget {
   final String text;
   final EdgeInsets padding;
 
-  const _SectionSub(this.text, {this.padding = const EdgeInsets.fromLTRB(16, 0, 16, 0)});
+  const _SectionSub(
+    this.text, {
+    this.padding = const EdgeInsets.fromLTRB(16, 0, 16, 0),
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -390,7 +398,10 @@ class _SectionSub extends StatelessWidget {
       padding: padding,
       child: Text(
         text,
-        style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: AppColors.textGrey),
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 11.5,
+          color: AppColors.textGrey,
+        ),
       ),
     );
   }
@@ -641,9 +652,7 @@ class _MicroSection extends StatelessWidget {
             border: Border.all(color: Colors.black.withValues(alpha: 0.04)),
           ),
           child: Column(
-            children: [
-              for (final micro in _micros) _MicroRow(micro: micro),
-            ],
+            children: [for (final micro in _micros) _MicroRow(micro: micro)],
           ),
         ),
       ],
@@ -822,10 +831,7 @@ class _MealTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: meal.color.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(99),
@@ -927,7 +933,11 @@ class _ExportCard extends StatelessWidget {
               color: Colors.white24,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.picture_as_pdf, color: Colors.white, size: 24),
+            child: const Icon(
+              Icons.picture_as_pdf,
+              color: Colors.white,
+              size: 24,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(

@@ -7,7 +7,8 @@ import '../../../../core/widgets/ingredient_image.dart';
 import '../../../../injection_container.dart';
 import '../../../child/domain/entities/child.dart';
 import '../../../auth/presentation/pages/profile_page.dart';
-import '../../../child/presentation/pages/child_list_page.dart';
+import '../../../child/presentation/pages/hpk_hub_page.dart';
+import '../../../pregnancy/domain/entities/pregnancy.dart';
 import '../../../notifications/presentation/pages/notifications_page.dart';
 import '../../../recipe/domain/entities/recipe_audience.dart';
 import '../../../recipe/presentation/pages/ai_recipe_result_page.dart';
@@ -76,7 +77,7 @@ class _HomeContentState extends State<_HomeContent> {
         page = const NutritionPage();
         break;
       case 4:
-        page = const ChildListPage();
+        page = const HpkHubPage();
         break;
       default:
         return;
@@ -101,8 +102,8 @@ class _HomeContentState extends State<_HomeContent> {
             child: state.when(
               initial: () => _buildLoading(),
               loading: () => _buildLoading(),
-              loaded: (summary, children) =>
-                  _buildDashboard(context, summary, children),
+              loaded: (summary, children, pregnancy) =>
+                  _buildDashboard(context, summary, children, pregnancy),
               failure: (message) => _buildError(context, message),
             ),
           ),
@@ -120,7 +121,7 @@ class _HomeContentState extends State<_HomeContent> {
     state.when(
       initial: () {},
       loading: () {},
-      loaded: (summary, _) => expiringCount = summary.criticalItems.length,
+      loaded: (summary, _, _) => expiringCount = summary.criticalItems.length,
       failure: (_) {},
     );
     return AppBar(
@@ -300,6 +301,7 @@ class _HomeContentState extends State<_HomeContent> {
     BuildContext context,
     DashboardSummary summary,
     List<Child> children,
+    Pregnancy? pregnancy,
   ) {
     final firstChild = children.isNotEmpty ? children.first : null;
     final statSafe =
@@ -317,6 +319,19 @@ class _HomeContentState extends State<_HomeContent> {
             statTotal: summary.totalStocks,
             statSafe: statSafe,
             statSoon: summary.expiringCount + summary.expiredCount,
+          ),
+          const SizedBox(height: 16),
+          _HpkStrip(
+            pregnancy: pregnancy,
+            child: firstChild,
+            onTap: () =>
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HpkHubPage()),
+                ).then((_) {
+                  if (context.mounted)
+                    context.read<HomeCubit>().loadDashboard();
+                }),
           ),
           const SizedBox(height: 16),
           _FridgeAlertCard(items: summary.criticalItems),
@@ -720,6 +735,7 @@ class _AiSheetBody extends StatefulWidget {
 class _AiSheetBodyState extends State<_AiSheetBody> {
   final Set<int> _selected = {};
   RecipeAudience _audience = RecipeAudience.family;
+  int _servings = 2;
 
   void _toggle(int id) {
     setState(() {
@@ -737,6 +753,7 @@ class _AiSheetBodyState extends State<_AiSheetBody> {
         builder: (_) => AiRecipeResultPage(
           ingredientIds: _selected.toList(),
           audience: _audience,
+          servings: _servings,
         ),
       ),
     );
@@ -819,7 +836,7 @@ class _AiSheetBodyState extends State<_AiSheetBody> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Untuk siapa resep ini?',
+                  'Untuk siapa?',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -928,8 +945,9 @@ class _AiSheetBodyState extends State<_AiSheetBody> {
                   final order = <String, int>{};
                   for (final stock in state.stocks) {
                     final raw = stock.ingredient.categoryName;
-                    final label =
-                        (raw == null || raw.isEmpty) ? 'Lainnya' : raw;
+                    final label = (raw == null || raw.isEmpty)
+                        ? 'Lainnya'
+                        : raw;
                     groups
                         .putIfAbsent(label, () => {})
                         .putIfAbsent(
@@ -983,8 +1001,7 @@ class _AiSheetBodyState extends State<_AiSheetBody> {
                                     for (final entry in groups[label]!.entries)
                                       _AiSelectChip(
                                         label: entry.value,
-                                        selected:
-                                            _selected.contains(entry.key),
+                                        selected: _selected.contains(entry.key),
                                         onTap: () => _toggle(entry.key),
                                       ),
                                   ],
@@ -1017,6 +1034,56 @@ class _AiSheetBodyState extends State<_AiSheetBody> {
                   ),
                   const SizedBox(height: 8),
                 ],
+                Text(
+                  'Jumlah porsi',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF374151),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [1, 2, 3, 4, 5]
+                      .map(
+                        (p) => ChoiceChip(
+                          label: Text(
+                            '$p porsi',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11,
+                              fontWeight: _servings == p
+                                  ? FontWeight.w700
+                                  : FontWeight.w600,
+                            ),
+                          ),
+                          selected: _servings == p,
+                          onSelected: (_) {
+                            setState(() {
+                              _servings = p;
+                            });
+                          },
+                          selectedColor: const Color(0xFFE8F5E9),
+                          labelStyle: TextStyle(
+                            color: _servings == p
+                                ? const Color(0xFF1B5E20)
+                                : const Color(0xFF374151),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(
+                              color: _servings == p
+                                  ? const Color(0xFF1B5E20)
+                                  : const Color(0xFFE5E7EB),
+                            ),
+                          ),
+                          backgroundColor: Colors.white,
+                        ),
+                      )
+                      .toList(),
+                ),
+                const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
@@ -1245,6 +1312,134 @@ class _NavItem extends StatelessWidget {
   }
 }
 
+class _HpkStrip extends StatelessWidget {
+  final Pregnancy? pregnancy;
+  final Child? child;
+  final VoidCallback onTap;
+
+  const _HpkStrip({
+    required this.pregnancy,
+    required this.child,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final int day;
+    final double progress;
+    final String eyebrow;
+    final String title;
+    final String caption;
+
+    if (pregnancy != null) {
+      day = pregnancy!.hpkDay;
+      progress = pregnancy!.hpkProgress;
+      eyebrow = '1000 HPK · KEHAMILAN';
+      title = pregnancy!.motherName;
+      caption =
+          'Minggu ke-${pregnancy!.ageInWeeks} · trimester ${pregnancy!.trimester}';
+    } else if (child != null) {
+      day = child!.hpkDay;
+      progress = child!.hpkProgress;
+      eyebrow = '1000 HPK · SI KECIL';
+      title = child!.name;
+      caption = child!.isHpkComplete
+          ? 'Masa 1000 HPK sudah selesai'
+          : '${child!.ageInMonths} bulan';
+    } else {
+      day = 0;
+      progress = 0;
+      eyebrow = '1000 HPK';
+      title = 'Mulai pantau hari pertama kehidupan';
+      caption = 'Catat HPHT atau tambahkan profil anak.';
+    }
+
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          eyebrow,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.playfairDisplay(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.ink,
+                          ),
+                        ),
+                        Text(
+                          caption,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            color: AppColors.textGrey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    day == 0 ? 'Mulai' : '$day/1000',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+              if (day > 0) ...[
+                const SizedBox(height: 10),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(9999),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 6,
+                    backgroundColor: AppColors.hairline,
+                    valueColor: const AlwaysStoppedAnimation(
+                      AppColors.accentOrange,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _FridgeAlertCard extends StatelessWidget {
   final List<Stock> items;
 
@@ -1307,9 +1502,9 @@ class _FridgeAlertCard extends StatelessWidget {
                           width: 6,
                           height: 6,
                           decoration: BoxDecoration(
-                          color: items.isEmpty
-                              ? const Color(0xFF15803D)
-                              : const Color(0xFFDC2626),
+                            color: items.isEmpty
+                                ? const Color(0xFF15803D)
+                                : const Color(0xFFDC2626),
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -1606,17 +1801,14 @@ class _InventorySection extends StatelessWidget {
           trailing: InkWell(
             onTap: onAddStock,
             borderRadius: BorderRadius.circular(16),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 7,
-                ),
-                constraints: const BoxConstraints(minHeight: 44),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1B5E20),
-                  borderRadius: BorderRadius.circular(16),
-                ),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              constraints: const BoxConstraints(minHeight: 44),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: const Color(0xFF1B5E20),
+                borderRadius: BorderRadius.circular(16),
+              ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -1872,7 +2064,9 @@ class _InvCard extends StatelessWidget {
           color: highlight ? const Color(0xFFFEF2F2) : Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: highlight ? const Color(0xFFFCA5A5) : const Color(0xFFF3F4F6),
+            color: highlight
+                ? const Color(0xFFFCA5A5)
+                : const Color(0xFFF3F4F6),
           ),
         ),
         child: Column(

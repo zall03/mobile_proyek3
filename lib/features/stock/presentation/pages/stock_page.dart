@@ -45,9 +45,7 @@ class _StockBodyState extends State<_StockBody> {
   Future<void> _openAddEdit(BuildContext context, Stock? stock) async {
     final saved = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(
-        builder: (_) => AddEditStockPage(existingStock: stock),
-      ),
+      MaterialPageRoute(builder: (_) => AddEditStockPage(existingStock: stock)),
     );
     if (saved == true && context.mounted) {
       context.read<StockCubit>().loadStocks();
@@ -73,7 +71,10 @@ class _StockBodyState extends State<_StockBody> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Hapus', style: TextStyle(color: Colors.redAccent)),
+            child: const Text(
+              'Hapus',
+              style: TextStyle(color: Colors.redAccent),
+            ),
           ),
         ],
       ),
@@ -112,7 +113,10 @@ class _StockBodyState extends State<_StockBody> {
         listener: (context, state) {
           if (state is StockFailure && !state.isSearchRelated) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.redAccent),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.redAccent,
+              ),
             );
           } else if (state is StockLoaded && state.message != null) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -185,7 +189,8 @@ class _StockContentState extends State<_StockContent> {
 
     if (stocks.isEmpty) {
       return const _EmptyState(
-        hint: 'Belum ada stok. Gunakan tombol Tambah Stok untuk mencatat bahan makanan '
+        hint:
+            'Belum ada stok. Gunakan tombol Tambah Stok untuk mencatat bahan makanan '
             'yang Anda miliki beserta tanggal kedaluwarsanya.',
       );
     }
@@ -233,10 +238,10 @@ class _StockContentState extends State<_StockContent> {
   }
 
   List<(String, List<Stock>)> _buildSections(List<Stock> visible) {
-    final priority =
-        visible.where((s) => s.status != StockStatus.fresh).toList();
-    final fresh =
-        visible.where((s) => s.status == StockStatus.fresh).toList();
+    final priority = visible
+        .where((s) => s.status != StockStatus.fresh)
+        .toList();
+    final fresh = visible.where((s) => s.status == StockStatus.fresh).toList();
 
     return [
       if (priority.isNotEmpty) ('Prioritas Olah (Mendekati Expired)', priority),
@@ -271,12 +276,23 @@ class _StockContentState extends State<_StockContent> {
         textInputAction: TextInputAction.search,
         decoration: InputDecoration(
           hintText: 'Cari bahan...',
-          hintStyle: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppColors.textGrey),
-          prefixIcon: const Icon(Icons.search, color: AppColors.textGrey, size: 20),
+          hintStyle: GoogleFonts.plusJakartaSans(
+            fontSize: 13,
+            color: AppColors.textGrey,
+          ),
+          prefixIcon: const Icon(
+            Icons.search,
+            color: AppColors.textGrey,
+            size: 20,
+          ),
           suffixIcon: _searchController.text.isEmpty
               ? null
               : IconButton(
-                  icon: const Icon(Icons.clear, size: 18, color: AppColors.textGrey),
+                  icon: const Icon(
+                    Icons.clear,
+                    size: 18,
+                    color: AppColors.textGrey,
+                  ),
                   onPressed: () => setState(() => _searchController.clear()),
                 ),
           filled: true,
@@ -329,7 +345,9 @@ class _CategoryFilter extends StatelessWidget {
                 backgroundColor: AppColors.cardWhite,
                 labelStyle: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
-                  color: selectedId == id ? Colors.white : AppColors.primaryDark,
+                  color: selectedId == id
+                      ? Colors.white
+                      : AppColors.primaryDark,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -398,20 +416,20 @@ class _StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final (bg, fg, label) = switch (stock.status) {
       StockStatus.expired => (
-          AppColors.dangerBorder,
-          AppColors.danger,
-          'Kedaluwarsa',
-        ),
+        AppColors.dangerBorder,
+        AppColors.danger,
+        'Kedaluwarsa',
+      ),
       StockStatus.expiring => (
-          AppColors.accentOrangeBg,
-          AppColors.warning,
-          'Perlu diolah (${stock.daysLeft}h)',
-        ),
+        AppColors.accentOrangeBg,
+        AppColors.warning,
+        'Perlu diolah (${stock.daysLeft}h)',
+      ),
       StockStatus.fresh => (
-          AppColors.bgGradientStart,
-          AppColors.primary,
-          'Aman',
-        ),
+        AppColors.bgGradientStart,
+        AppColors.primary,
+        'Aman',
+      ),
     };
 
     return Container(
@@ -445,8 +463,7 @@ class _StockCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final qty =
-        stock.quantity.toStringAsFixed(stock.quantity % 1 == 0 ? 0 : 1);
+    final qty = stock.quantity.toStringAsFixed(stock.quantity % 1 == 0 ? 0 : 1);
     final expiry = stock.expiryDate;
 
     return Material(
@@ -637,10 +654,7 @@ class _CenteredStatus extends StatelessWidget {
             ),
             if (actionLabel != null && onAction != null) ...[
               const SizedBox(height: 12),
-              TextButton(
-                onPressed: onAction,
-                child: Text(actionLabel!),
-              ),
+              TextButton(onPressed: onAction, child: Text(actionLabel!)),
             ],
           ],
         ),

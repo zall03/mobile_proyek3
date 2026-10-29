@@ -13,11 +13,13 @@ import '../widgets/recipe_body.dart';
 class AiRecipeResultPage extends StatelessWidget {
   final List<int> ingredientIds;
   final RecipeAudience audience;
+  final int servings;
 
   const AiRecipeResultPage({
     super.key,
     required this.ingredientIds,
     this.audience = RecipeAudience.family,
+    this.servings = 2,
   });
 
   @override
@@ -28,6 +30,7 @@ class AiRecipeResultPage extends StatelessWidget {
           ingredientIds,
           forWhom: audience.apiValue,
           restrictions: audience.restrictions,
+          servings: servings,
         ),
       child: Scaffold(
         backgroundColor: AppColors.bgGradientStart,
@@ -70,6 +73,7 @@ class AiRecipeResultPage extends StatelessWidget {
                   ingredientIds,
                   forWhom: audience.apiValue,
                   restrictions: audience.restrictions,
+                  servings: servings,
                 ),
               ),
             );

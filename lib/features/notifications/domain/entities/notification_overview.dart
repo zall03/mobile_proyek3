@@ -6,7 +6,7 @@ class MeasurementReminder extends Equatable {
   final String childId;
   final String name;
   final String gender;
-  final DateTime birthDate;
+  final DateTime? birthDate;
   final DateTime? lastMeasuredAt;
   final int? daysSinceLast;
   final double? lastWeight;
@@ -16,7 +16,7 @@ class MeasurementReminder extends Equatable {
     required this.childId,
     required this.name,
     required this.gender,
-    required this.birthDate,
+    this.birthDate,
     this.lastMeasuredAt,
     this.daysSinceLast,
     this.lastWeight,

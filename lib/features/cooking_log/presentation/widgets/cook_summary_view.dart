@@ -148,7 +148,10 @@ class _HeroBand extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(8),
@@ -213,20 +216,14 @@ class _HeroBand extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: [
-              _MetaBadge(
-                icon: Icons.restaurant_menu,
-                label: '$servings porsi',
-              ),
+              _MetaBadge(icon: Icons.restaurant_menu, label: '$servings porsi'),
               if (minutesSpent > 0)
                 _MetaBadge(
                   icon: Icons.timer_outlined,
                   label: '$minutesSpent menit',
                 )
               else
-                const _MetaBadge(
-                  icon: Icons.check,
-                  label: 'Selesai dicatat',
-                ),
+                const _MetaBadge(icon: Icons.check, label: 'Selesai dicatat'),
             ],
           ),
         ],
@@ -387,7 +384,10 @@ class _NutritionCard extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.accentOrangeBg,
                     borderRadius: BorderRadius.circular(8),
@@ -417,11 +417,7 @@ class _NutritionCard extends StatelessWidget {
                     unit: 'g',
                   ),
                 ),
-                Container(
-                  width: 1,
-                  height: 38,
-                  color: AppColors.hairline,
-                ),
+                Container(width: 1, height: 38, color: AppColors.hairline),
                 Expanded(
                   child: _MacroColumn(
                     label: 'Lemak',
@@ -430,11 +426,7 @@ class _NutritionCard extends StatelessWidget {
                     unit: 'g',
                   ),
                 ),
-                Container(
-                  width: 1,
-                  height: 38,
-                  color: AppColors.hairline,
-                ),
+                Container(width: 1, height: 38, color: AppColors.hairline),
                 Expanded(
                   child: _MacroColumn(
                     label: 'Karbohidrat',
@@ -509,7 +501,9 @@ class _NutritionCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: const BoxDecoration(
                 color: Color(0xFFFFFBEB),
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(15)),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(15),
+                ),
               ),
               child: Text(
                 'Belum dihitung ke total gizi: '
@@ -532,8 +526,8 @@ class _NutritionCard extends StatelessWidget {
     var s = v.abs() >= 100
         ? v.toStringAsFixed(0)
         : v.abs() >= 10
-            ? v.toStringAsFixed(1)
-            : v.toStringAsFixed(2);
+        ? v.toStringAsFixed(1)
+        : v.toStringAsFixed(2);
     if (s.contains('.')) {
       s = s.replaceFirst(RegExp(r'0+$'), '');
       s = s.replaceFirst(RegExp(r'\.$'), '');
@@ -688,7 +682,10 @@ class _DeductionLedger extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: rows[i].emptied
                         ? const Color(0xFFF3F4F6)
@@ -847,7 +844,9 @@ class _StepsAccordion extends StatelessWidget {
                             height: 22,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: AppColors.primaryDark.withValues(alpha: 0.1),
+                              color: AppColors.primaryDark.withValues(
+                                alpha: 0.1,
+                              ),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -932,10 +931,7 @@ class _ActionButtons extends StatelessWidget {
             ),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.primaryDark,
-              side: const BorderSide(
-                color: AppColors.primaryDark,
-                width: 1.2,
-              ),
+              side: const BorderSide(color: AppColors.primaryDark, width: 1.2),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),

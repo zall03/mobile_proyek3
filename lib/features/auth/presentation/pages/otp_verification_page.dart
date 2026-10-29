@@ -91,15 +91,15 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
       create: (_) => sl<AuthCubit>(),
       child: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
-           if (state is OtpVerified) {
-             _timer?.cancel();
-             Navigator.pushAndRemoveUntil(
-               context,
-               MaterialPageRoute(
-                 builder: (_) => HomePage(userName: state.user.name),
-               ),
-               (_) => false,
-             );
+          if (state is OtpVerified) {
+            _timer?.cancel();
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (_) => HomePage(userName: state.user.name),
+              ),
+              (_) => false,
+            );
           } else if (state is OtpResent) {
             _startTimer();
             ScaffoldMessenger.of(context).showSnackBar(

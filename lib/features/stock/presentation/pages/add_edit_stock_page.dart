@@ -252,9 +252,8 @@ class _AddEditStockPageState extends State<AddEditStockPage> {
                             Expanded(
                               child: Text(
                                 _selectedDate != null
-                                    ? DateFormat('dd/MM/yyyy').format(
-                                        _selectedDate!,
-                                      )
+                                    ? DateFormat('dd/MM/yyyy')
+                                          .format(_selectedDate!)
                                     : 'Tanpa tanggal kedaluwarsa',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 13.5,

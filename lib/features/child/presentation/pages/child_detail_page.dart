@@ -3,122 +3,160 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/hpk.dart';
+import '../../../../core/utils/who_standards.dart';
 import '../../../../injection_container.dart';
-import '../../../auth/presentation/pages/profile_page.dart';
 import '../../domain/entities/child.dart';
 import '../../domain/usecases/child_usecases.dart';
 
 class ChildDetailPage extends StatefulWidget {
   final Child child;
+  final bool openMeasurementOnLoad;
 
-  const ChildDetailPage({super.key, required this.child});
+  const ChildDetailPage({
+    super.key,
+    required this.child,
+    this.openMeasurementOnLoad = false,
+  });
 
   @override
   State<ChildDetailPage> createState() => _ChildDetailPageState();
 }
 
 class _ChildDetailPageState extends State<ChildDetailPage> {
+  late Child _child;
   List<ChildMeasurement> _measurements = [];
   bool _loading = true;
+  String? _error;
   String _chartTab = 'TB/U';
+  bool _openedMeasurement = false;
 
   @override
   void initState() {
     super.initState();
+    _child = widget.child;
     _load();
   }
 
   Future<void> _load() async {
-    final result = await sl<GetMeasurementsUsecase>().call(widget.child.id);
-    if (!mounted) return;
-    result.fold(
-      (_) => setState(() => _loading = false),
-      (list) => setState(() {
-        _measurements = list..sort((a, b) => a.measuredAt.compareTo(b.measuredAt));
-        _loading = false;
-      }),
+    final childResult = await sl<GetChildByIdUsecase>().call(_child.id);
+    final measurementResult = await sl<GetMeasurementsUsecase>().call(
+      _child.id,
     );
+    if (!mounted) return;
+
+    final error = childResult.fold<String?>((failure) => failure.message, (
+      child,
+    ) {
+      _child = child;
+      return null;
+    });
+    final measurementError = measurementResult.fold<String?>(
+      (failure) {
+        return failure.message;
+      },
+      (list) {
+        _measurements = list
+          ..sort((a, b) => a.measuredAt.compareTo(b.measuredAt));
+        return null;
+      },
+    );
+
+    setState(() {
+      _loading = false;
+      _error = error ?? measurementError;
+    });
+
+    if (widget.openMeasurementOnLoad && !_openedMeasurement) {
+      _openedMeasurement = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _showMeasurementDialog();
+      });
+    }
   }
 
-  ChildMeasurement? get _latest => _measurements.isNotEmpty ? _measurements.last : null;
-
-  String get _statusLabel {
-    if (_latest == null) return 'Belum ada data';
-    final age = widget.child.ageInMonths;
-    final h = _latest!.height;
-    final median = _whoMedian(widget.child.gender, age);
-    final threshold = _whoMinus2Sd(widget.child.gender, age);
-    if (h < threshold) return 'Stunting';
-    if (h < median - 1) return 'Gizi Baik';
-    return 'Gizi Baik & Tumbuh Normal';
-  }
-
-  bool get _isNormal {
-    if (_latest == null) return true;
-    final age = widget.child.ageInMonths;
-    return _latest!.height >= _whoMinus2Sd(widget.child.gender, age);
-  }
+  ChildMeasurement? get _latest =>
+      _measurements.isNotEmpty ? _measurements.last : null;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8F6),
+      backgroundColor: AppColors.bgGradientStart,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        iconTheme: const IconThemeData(color: AppColors.primaryDeep),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Dapur Cerdas', style: GoogleFonts.playfairDisplay(fontSize: 14, fontWeight: FontWeight.w800, color: const Color(0xFF1B5E20))),
-            Text('Si Kecil', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: const Color(0xFF6B7280))),
+            Text(
+              'Dapur Cerdas',
+              style: GoogleFonts.playfairDisplay(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: AppColors.primaryDeep,
+              ),
+            ),
+            Text(
+              '1000 HPK',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11,
+                color: AppColors.textGrey,
+              ),
+            ),
           ],
         ),
-        iconTheme: const IconThemeData(color: Color(0xFF111827)),
-        actions: [
-          const Icon(Icons.notifications_none_rounded, color: Color(0xFF6B7280)),
-          const SizedBox(width: 12),
-          InkWell(
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfilePage())),
-            borderRadius: BorderRadius.circular(14),
-            child: const CircleAvatar(radius: 14, backgroundColor: Color(0xFFE8F5E9), child: Icon(Icons.person, size: 14, color: Color(0xFF1B5E20))),
-          ),
-          const SizedBox(width: 12),
-        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: RefreshIndicator(
+        color: AppColors.primary,
+        onRefresh: _load,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
           children: [
-            _HeaderCard(child: widget.child, latest: _latest),
+            _HeaderCard(child: _child),
             const SizedBox(height: 12),
-            _StatRow(latest: _latest, isNormal: _isNormal),
+            _StatRow(latest: _latest),
             const SizedBox(height: 16),
             _ChartCard(
-              child: widget.child,
+              child: _child,
               measurements: _measurements,
               loading: _loading,
               tab: _chartTab,
-              statusLabel: _statusLabel,
-              isNormal: _isNormal,
-              onTabChanged: (v) => setState(() => _chartTab = v),
+              onTabChanged: (value) => setState(() => _chartTab = value),
             ),
             const SizedBox(height: 16),
-            _MpasiGuide(ageMonths: widget.child.ageInMonths, statusLabel: _statusLabel, isNormal: _isNormal),
-            const SizedBox(height: 12),
-            _FoodRecs(),
+            _HistorySection(
+              child: _child,
+              measurements: _measurements,
+              loading: _loading,
+              error: _error,
+              onAdd: _showMeasurementDialog,
+              onRetry: _load,
+            ),
+            const SizedBox(height: 16),
+            _MpasiGuide(ageMonths: _child.ageInMonths),
             const SizedBox(height: 16),
             SizedBox(
-              width: double.infinity,
+              height: 52,
               child: ElevatedButton.icon(
-                onPressed: _showAddDialog,
-                icon: const Icon(Icons.edit, size: 16, color: Colors.white),
-                label: Text('Perbarui Data Pengukuran (Catat BB/TB)', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, fontSize: 13, color: Colors.white)),
+                onPressed: _showMeasurementDialog,
+                icon: const Icon(Icons.add_chart, size: 18),
+                label: Text(
+                  'Catat pengukuran baru',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1B5E20),
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
             ),
@@ -128,123 +166,330 @@ class _ChildDetailPageState extends State<ChildDetailPage> {
     );
   }
 
-  Future<void> _showAddDialog() async {
-    final wCtrl = TextEditingController(text: _latest?.weight.toString() ?? '');
-    final hCtrl = TextEditingController(text: _latest?.height.toString() ?? '');
-    DateTime date = DateTime.now();
-    final ok = await showDialog<bool>(
+  Future<void> _showMeasurementDialog() async {
+    final weight = TextEditingController(text: _numInput(_latest?.weight));
+    final height = TextEditingController(text: _numInput(_latest?.height));
+    final head = TextEditingController(
+      text: _numInput(_latest?.headCircumference),
+    );
+    final notes = TextEditingController();
+    DateTime date = dateOnly(DateTime.now());
+    String? dialogError;
+
+    final saved = await showDialog<bool>(
       context: context,
-      builder: (ctx) => StatefulBuilder(builder: (ctx, setS) {
-        return AlertDialog(
-          title: Text('Catat Pengukuran', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(controller: wCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Berat (kg)', hintText: 'contoh 11.2')),
-              const SizedBox(height: 10),
-              TextField(controller: hCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Tinggi (cm)', hintText: 'contoh 83.5')),
-              const SizedBox(height: 10),
-              InkWell(
-                onTap: () async {
-                  final p = await showDatePicker(context: ctx, initialDate: date, firstDate: DateTime(2020), lastDate: DateTime.now());
-                  if (p != null) setS(() => date = p);
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) {
+          return AlertDialog(
+            title: Text(
+              'Catat Pengukuran',
+              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Isi minimal satu ukuran.',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      color: AppColors.textGrey,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: weight,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: const InputDecoration(
+                      labelText: 'Berat (kg)',
+                      hintText: 'contoh 9.4',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: height,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: const InputDecoration(
+                      labelText: 'Tinggi (cm)',
+                      hintText: 'contoh 74.5',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: head,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: const InputDecoration(
+                      labelText: 'Lingkar kepala (cm)',
+                      hintText: 'contoh 44',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  InkWell(
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: dialogContext,
+                        initialDate: date,
+                        firstDate: dateOnly(_child.birthDate),
+                        lastDate: dateOnly(DateTime.now()),
+                      );
+                      if (picked != null) {
+                        setDialogState(() => date = picked);
+                      }
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 14,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: AppColors.border),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              DateFormat('d MMMM yyyy', 'id').format(date),
+                              style: GoogleFonts.plusJakartaSans(fontSize: 13),
+                            ),
+                          ),
+                          const Icon(
+                            Icons.calendar_today_outlined,
+                            size: 16,
+                            color: AppColors.primary,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: notes,
+                    maxLines: 2,
+                    decoration: const InputDecoration(
+                      labelText: 'Catatan (opsional)',
+                      hintText: 'contoh: diukur di posyandu',
+                    ),
+                  ),
+                  if (dialogError != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      dialogError!,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        color: AppColors.danger,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Batal'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  final w = _parse(weight.text);
+                  final h = _parse(height.text);
+                  final lk = _parse(head.text);
+                  if (w == null && h == null && lk == null) {
+                    setDialogState(
+                      () => dialogError = 'Isi minimal satu ukuran',
+                    );
+                    return;
+                  }
+                  Navigator.pop(dialogContext, true);
                 },
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                  decoration: BoxDecoration(border: Border.all(color: const Color(0xFFE5E7EB)), borderRadius: BorderRadius.circular(8)),
-                  child: Text(DateFormat('dd MMM yyyy').format(date), style: GoogleFonts.plusJakartaSans()),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
                 ),
+                child: const Text('Simpan'),
               ),
             ],
+          );
+        },
+      ),
+    );
+
+    final w = _parse(weight.text);
+    final h = _parse(height.text);
+    final lk = _parse(head.text);
+    final note = notes.text.trim();
+    weight.dispose();
+    height.dispose();
+    head.dispose();
+    notes.dispose();
+
+    if (saved != true) return;
+
+    final result = await sl<AddMeasurementUsecase>().call(
+      childId: _child.id,
+      weight: w,
+      height: h,
+      headCircumference: lk,
+      notes: note.isEmpty ? null : note,
+      measuredAt: date,
+    );
+    if (!mounted) return;
+    result.fold(
+      (failure) => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            failure.message,
+            style: GoogleFonts.plusJakartaSans(fontSize: 13),
           ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Batal')),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1B5E20), foregroundColor: Colors.white),
-              child: const Text('Simpan'),
-            ),
-          ],
-        );
-      }),
-    );
-    if (ok != true) return;
-    final w = double.tryParse(wCtrl.text.replaceAll(',', '.'));
-    final h = double.tryParse(hCtrl.text.replaceAll(',', '.'));
-    if (w == null || h == null) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Berat dan tinggi harus angka', style: GoogleFonts.plusJakartaSans()), backgroundColor: Colors.red));
-      return;
-    }
-    final res = await sl<AddMeasurementUsecase>().call(childId: widget.child.id, weight: w, height: h, measuredAt: date);
-    res.fold(
-      (f) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(f.message, style: GoogleFonts.plusJakartaSans()), backgroundColor: Colors.red));
-      },
+          behavior: SnackBarBehavior.floating,
+        ),
+      ),
       (_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Pengukuran tersimpan',
+              style: GoogleFonts.plusJakartaSans(fontSize: 13),
+            ),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
         _load();
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Pengukuran dicatat', style: GoogleFonts.plusJakartaSans()), backgroundColor: const Color(0xFF1B5E20)));
       },
     );
+  }
+
+  static double? _parse(String value) {
+    if (value.trim().isEmpty) return null;
+    return double.tryParse(value.trim().replaceAll(',', '.'));
+  }
+
+  static String _numInput(double? value) {
+    if (value == null) return '';
+    return value == value.roundToDouble()
+        ? value.toStringAsFixed(0)
+        : value.toStringAsFixed(1);
   }
 }
 
 class _HeaderCard extends StatelessWidget {
   final Child child;
-  final ChildMeasurement? latest;
-  const _HeaderCard({required this.child, this.latest});
+
+  const _HeaderCard({required this.child});
 
   @override
   Widget build(BuildContext context) {
-    final df = DateFormat('dd MMM yyyy');
+    final df = DateFormat('d MMM yyyy', 'id');
+    final day = child.hpkDay;
+    final progress = child.hpkProgress;
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: const Color(0xFFF3F4F6))),
-      child: Row(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Stack(
+          Row(
             children: [
-              CircleAvatar(radius: 28, backgroundColor: const Color(0xFFE8F5E9), child: Icon(child.gender == 'male' ? Icons.boy : Icons.girl, color: const Color(0xFF1B5E20), size: 28)),
-              Positioned(bottom: 0, right: 0, child: Container(width: 18, height: 18, decoration: BoxDecoration(color: const Color(0xFF1B5E20), shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)), child: const Icon(Icons.check, size: 10, color: Colors.white))),
-            ],
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+              CircleAvatar(
+                radius: 26,
+                backgroundColor: AppColors.primary.withValues(alpha: 0.08),
+                child: Icon(
+                  child.gender == 'male' ? Icons.boy : Icons.girl,
+                  color: AppColors.primary,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(child.name, style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w800, color: const Color(0xFF111827))),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(color: const Color(0xFFDCFCE7), borderRadius: BorderRadius.circular(20)),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(width: 6, height: 6, decoration: const BoxDecoration(color: Color(0xFF16A34A), shape: BoxShape.circle)),
-                          const SizedBox(width: 4),
-                          Text('Aktif', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w700, color: const Color(0xFF166534))),
-                        ],
+                    Text(
+                      child.name,
+                      style: GoogleFonts.playfairDisplay(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.ink,
+                      ),
+                    ),
+                    Text(
+                      '${child.ageInMonths} bulan · '
+                      '${child.gender == 'male' ? 'Laki-laki' : 'Perempuan'}',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        color: AppColors.textGrey,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 2),
-                Text('${child.ageInMonths} Bulan (${child.gender == 'male' ? 'Laki-laki' : 'Perempuan'})', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: const Color(0xFF6B7280))),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    _MiniTag(icon: Icons.cake_outlined, label: df.format(child.birthDate)),
-                    const SizedBox(width: 8),
-                    _MiniTag(icon: Icons.water_drop_outlined, label: 'Gol. O+'),
-                  ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              _MiniTag(
+                icon: Icons.cake_outlined,
+                label: df.format(child.birthDate),
+              ),
+              if (child.isEstimatedHpht)
+                const _MiniTag(
+                  icon: Icons.info_outline,
+                  label: 'HPHT perkiraan',
+                )
+              else
+                _MiniTag(
+                  icon: Icons.event_available_outlined,
+                  label: 'HPHT ${df.format(child.hpht!)}',
                 ),
-              ],
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Text(
+                child.isHpkComplete
+                    ? 'Masa 1000 HPK selesai'
+                    : 'Hari $day dari 1000 HPK',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.inkSoft,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '${(progress * 100).round()}%',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(9999),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 6,
+              backgroundColor: AppColors.hairline,
+              valueColor: const AlwaysStoppedAnimation(AppColors.primary),
             ),
           ),
         ],
@@ -256,31 +501,79 @@ class _HeaderCard extends StatelessWidget {
 class _MiniTag extends StatelessWidget {
   final IconData icon;
   final String label;
+
   const _MiniTag({required this.icon, required this.label});
+
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: const Color(0xFFF9FAFB), borderRadius: BorderRadius.circular(20), border: Border.all(color: const Color(0xFFE5E7EB))),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [Icon(icon, size: 12, color: const Color(0xFF6B7280)), const SizedBox(width: 4), Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 10, color: const Color(0xFF374151), fontWeight: FontWeight.w600))]),
+      decoration: BoxDecoration(
+        color: AppColors.bgGradientStart,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: AppColors.textGrey),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 10,
+              color: AppColors.inkSoft,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
 class _StatRow extends StatelessWidget {
   final ChildMeasurement? latest;
-  final bool isNormal;
-  const _StatRow({this.latest, required this.isNormal});
+
+  const _StatRow({this.latest});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(child: _StatCard(icon: Icons.monitor_weight_outlined, label: 'Berat (BB)', value: latest == null ? '-' : '${latest!.weight.toStringAsFixed(1)} kg', status: latest == null ? 'Belum ada' : 'Normal')),
-        const SizedBox(width: 10),
-        Expanded(child: _StatCard(icon: Icons.height, label: 'Tinggi (TB)', value: latest == null ? '-' : '${latest!.height.toStringAsFixed(1)} cm', status: latest == null ? 'Belum ada' : (isNormal ? 'Normal' : 'Stunting'))),
+        Expanded(
+          child: _StatCard(
+            icon: Icons.monitor_weight_outlined,
+            label: 'Berat',
+            value: _value(latest?.weight, 'kg'),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _StatCard(
+            icon: Icons.height,
+            label: 'Tinggi',
+            value: _value(latest?.height, 'cm'),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _StatCard(
+            icon: Icons.circle_outlined,
+            label: 'Lingkar kepala',
+            value: _value(latest?.headCircumference, 'cm'),
+          ),
+        ),
       ],
     );
+  }
+
+  static String _value(double? value, String unit) {
+    if (value == null) return '-';
+    final text = value == value.roundToDouble()
+        ? value.toStringAsFixed(0)
+        : value.toStringAsFixed(1);
+    return '$text $unit';
   }
 }
 
@@ -288,25 +581,53 @@ class _StatCard extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  final String status;
-  const _StatCard({required this.icon, required this.label, required this.value, required this.status});
+
+  const _StatCard({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
   @override
   Widget build(BuildContext context) {
-    final ok = status == 'Normal';
     return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: const Color(0xFFF3F4F6))),
+      padding: const EdgeInsets.all(11),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(children: [Icon(icon, size: 14, color: const Color(0xFF6B7280)), const SizedBox(width: 6), Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 11, color: const Color(0xFF6B7280)))]),
+          Row(
+            children: [
+              Icon(icon, size: 13, color: AppColors.textGrey),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 10,
+                    color: AppColors.textGrey,
+                  ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 8),
-          Text(value, style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w800, color: const Color(0xFF111827))),
-          const SizedBox(height: 4),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(color: ok ? const Color(0xFFDCFCE7) : const Color(0xFFFEE2E2), borderRadius: BorderRadius.circular(20)),
-            child: Text(status, style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w700, color: ok ? const Color(0xFF166534) : const Color(0xFF991B1B))),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: AppColors.ink,
+              ),
+            ),
           ),
         ],
       ),
@@ -319,80 +640,146 @@ class _ChartCard extends StatelessWidget {
   final List<ChildMeasurement> measurements;
   final bool loading;
   final String tab;
-  final String statusLabel;
-  final bool isNormal;
-  final Function(String) onTabChanged;
+  final ValueChanged<String> onTabChanged;
 
   const _ChartCard({
     required this.child,
     required this.measurements,
     required this.loading,
     required this.tab,
-    required this.statusLabel,
-    required this.isNormal,
     required this.onTabChanged,
   });
+
+  bool get _supportsAge => child.ageInMonths >= 6 && child.ageInMonths <= 36;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: const Color(0xFFF3F4F6))),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Text('Grafik Standar WHO', style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700, color: const Color(0xFF111827))),
-              const Spacer(),
-              _TabPill(label: 'TB/U', active: tab == 'TB/U', onTap: () => onTabChanged('TB/U')),
+              Expanded(
+                child: Text(
+                  'Kurva pertumbuhan',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.ink,
+                  ),
+                ),
+              ),
+              _TabPill(
+                label: 'TB/U',
+                active: tab == 'TB/U',
+                onTap: () => onTabChanged('TB/U'),
+              ),
               const SizedBox(width: 6),
-              _TabPill(label: 'BB/U', active: tab == 'BB/U', onTap: () => onTabChanged('BB/U')),
+              _TabPill(
+                label: 'BB/U',
+                active: tab == 'BB/U',
+                onTap: () => onTabChanged('BB/U'),
+              ),
             ],
           ),
           const SizedBox(height: 2),
-          Text(tab == 'BB/U' ? 'Berat Badan menurut Umur (BB/U)' : 'Tinggi Badan menurut Umur (TB/U)', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: const Color(0xFF6B7280))),
-          const SizedBox(height: 10),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            decoration: BoxDecoration(
-              color: isNormal ? const Color(0xFFF0FDF4) : const Color(0xFFFEF2F2),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: isNormal ? const Color(0xFFBBF7D0) : const Color(0xFFFECACA)),
-            ),
-            child: Row(
-              children: [
-                Icon(isNormal ? Icons.check_circle : Icons.warning_amber_rounded, size: 16, color: isNormal ? const Color(0xFF16A34A) : const Color(0xFFDC2626)),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(statusLabel, style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w700, color: isNormal ? const Color(0xFF166534) : const Color(0xFF991B1B))),
-                      Text(
-                        measurements.isEmpty ? 'Catat pengukuran pertama untuk melihat kurva' : 'Z-score: ${_zScore(child, measurements.isNotEmpty ? measurements.last.height : 0).toStringAsFixed(2)} SD • Pantau tiap bulan',
-                        style: GoogleFonts.plusJakartaSans(fontSize: 10, color: const Color(0xFF6B7280)),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+          Text(
+            tab == 'BB/U'
+                ? 'Berat badan menurut umur'
+                : 'Tinggi badan menurut umur',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 11,
+              color: AppColors.textGrey,
             ),
           ),
-          const SizedBox(height: 14),
-          SizedBox(height: 180, child: loading ? const Center(child: CircularProgressIndicator()) : _WhoChart(child: child, measurements: measurements, tab: tab)),
+          const SizedBox(height: 10),
+          if (!_supportsAge)
+            _ChartNote(
+              text: child.ageInMonths < 6
+                  ? 'Kurva ini dimulai pada usia 6 bulan. Catat pengukuran '
+                        'tetap berguna untuk memantau tren.'
+                  : 'Kurva di halaman ini berhenti di 36 bulan. Riwayat '
+                        'pengukuran tetap tersimpan.',
+            )
+          else if (loading)
+            const SizedBox(
+              height: 180,
+              child: Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              ),
+            )
+          else
+            SizedBox(
+              height: 200,
+              child: _WhoChart(
+                child: child,
+                measurements: measurements,
+                tab: tab,
+              ),
+            ),
           const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _LegendDot(color: const Color(0xFF1B5E20), label: 'Garis ${child.name.split(' ').first}'),
+              _LegendDot(
+                color: AppColors.primary,
+                label: child.name.split(' ').first,
+              ),
               const SizedBox(width: 12),
-              _LegendDot(color: const Color(0xFFF59E0B), label: 'Median WHO'),
+              const _LegendDot(color: Color(0xFFF59E0B), label: 'Median WHO'),
               const SizedBox(width: 12),
-              _LegendDot(color: const Color(0xFFDC2626), label: 'Ambang Stunting', dashed: true),
+              const _LegendDot(
+                color: AppColors.danger,
+                label: '-2 SD',
+                bordered: true,
+              ),
             ],
           ),
+          const SizedBox(height: 8),
+          Text(
+            'Angka median dan -2 SD dibulatkan dari tabel WHO 2006. '
+            'Grafik bukan diagnosis; konsultasikan hasilnya ke tenaga kesehatan.',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 10,
+              color: AppColors.textGrey,
+              height: 1.4,
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _ChartNote extends StatelessWidget {
+  final String text;
+
+  const _ChartNote({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.bgGradientStart,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Text(
+        text,
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 11,
+          color: AppColors.inkSoft,
+          height: 1.4,
+        ),
       ),
     );
   }
@@ -402,16 +789,37 @@ class _TabPill extends StatelessWidget {
   final String label;
   final bool active;
   final VoidCallback onTap;
-  const _TabPill({required this.label, required this.active, required this.onTap});
+
+  const _TabPill({
+    required this.label,
+    required this.active,
+    required this.onTap,
+  });
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(color: active ? const Color(0xFF1B5E20) : Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: active ? const Color(0xFF1B5E20) : const Color(0xFFE5E7EB))),
-        child: Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700, color: active ? Colors.white : const Color(0xFF374151))),
+        constraints: const BoxConstraints(minHeight: 44, minWidth: 48),
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          color: active ? AppColors.primary : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: active ? AppColors.primary : AppColors.border,
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: active ? Colors.white : AppColors.inkSoft,
+          ),
+        ),
       ),
     );
   }
@@ -420,16 +828,37 @@ class _TabPill extends StatelessWidget {
 class _LegendDot extends StatelessWidget {
   final Color color;
   final String label;
-  final bool dashed;
-  const _LegendDot({required this.color, required this.label, this.dashed = false});
+  final bool bordered;
+
+  const _LegendDot({
+    required this.color,
+    required this.label,
+    this.bordered = false,
+  });
+
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(width: 10, height: 10, decoration: BoxDecoration(color: dashed ? Colors.transparent : color, shape: BoxShape.circle, border: dashed ? Border.all(color: color, width: 2) : null)),
+        Container(
+          width: 9,
+          height: 9,
+          decoration: BoxDecoration(
+            color: bordered ? Colors.transparent : color,
+            shape: BoxShape.circle,
+            border: bordered ? Border.all(color: color, width: 2) : null,
+          ),
+        ),
         const SizedBox(width: 4),
-        Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.w600, color: const Color(0xFF6B7280))),
+        Text(
+          label,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 9,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textGrey,
+          ),
+        ),
       ],
     );
   }
@@ -439,33 +868,84 @@ class _WhoChart extends StatelessWidget {
   final Child child;
   final List<ChildMeasurement> measurements;
   final String tab;
-  const _WhoChart({required this.child, required this.measurements, required this.tab});
+
+  const _WhoChart({
+    required this.child,
+    required this.measurements,
+    required this.tab,
+  });
 
   @override
   Widget build(BuildContext context) {
     final isWeight = tab == 'BB/U';
-    final who = isWeight ? _whoWeightTable(child.gender) : _whoTable(child.gender);
-    final medianSpots = who.map((e) => FlSpot(e.age.toDouble(), e.median)).toList();
-    final minus2Spots = who.map((e) => FlSpot(e.age.toDouble(), e.minus2)).toList();
+    final who = isWeight ? _whoWeightTable(child.gender) : _whoTable();
+    final medianSpots = who
+        .map((point) => FlSpot(point.age.toDouble(), point.median))
+        .toList();
+    final minus2Spots = who
+        .map((point) => FlSpot(point.age.toDouble(), point.minus2))
+        .toList();
 
-    final childSpots = measurements.map((m) {
-      final age = _ageAt(m.measuredAt, child.birthDate);
-      return FlSpot(age, isWeight ? m.weight : m.height);
-    }).toList();
+    final childSpots = <FlSpot>[];
+    for (final measurement in measurements) {
+      final value = isWeight ? measurement.weight : measurement.height;
+      if (value == null) continue;
+      final age = _ageAt(measurement.measuredAt, child.birthDate);
+      if (age < 6 || age > 36) continue;
+      childSpots.add(FlSpot(age, value));
+    }
 
     final unit = isWeight ? 'kg' : 'cm';
     final minY = isWeight ? 5.0 : 64.0;
     final maxY = isWeight ? 17.0 : 98.0;
     final interval = isWeight ? 2.0 : 6.0;
+    final childBarIndex = childSpots.isEmpty ? -1 : 2;
 
     return LineChart(
       LineChartData(
-        gridData: FlGridData(show: true, drawVerticalLine: true, horizontalInterval: interval, verticalInterval: 6, getDrawingHorizontalLine: (_) => FlLine(color: const Color(0xFFF3F4F6), strokeWidth: 1)),
+        gridData: FlGridData(
+          show: true,
+          drawVerticalLine: true,
+          horizontalInterval: interval,
+          verticalInterval: 6,
+          getDrawingHorizontalLine: (_) =>
+              const FlLine(color: AppColors.hairline, strokeWidth: 1),
+        ),
         titlesData: FlTitlesData(
-          leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, interval: interval, reservedSize: 32, getTitlesWidget: (v, _) => Text(isWeight ? v.toStringAsFixed(0) : v.toInt().toString(), style: GoogleFonts.plusJakartaSans(fontSize: 9, color: const Color(0xFF9CA3AF))))),
-          bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, interval: 6, reservedSize: 22, getTitlesWidget: (v, _) => Text('${v.toInt()} bln', style: GoogleFonts.plusJakartaSans(fontSize: 8, color: const Color(0xFF9CA3AF))))),
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              interval: interval,
+              reservedSize: 32,
+              getTitlesWidget: (value, _) => Text(
+                isWeight ? value.toStringAsFixed(0) : value.toInt().toString(),
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 9,
+                  color: AppColors.textGrey,
+                ),
+              ),
+            ),
+          ),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              interval: 6,
+              reservedSize: 22,
+              getTitlesWidget: (value, _) => Text(
+                '${value.toInt()} bln',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 8,
+                  color: AppColors.textGrey,
+                ),
+              ),
+            ),
+          ),
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          rightTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
         ),
         borderData: FlBorderData(show: false),
         minX: 6,
@@ -473,24 +953,51 @@ class _WhoChart extends StatelessWidget {
         minY: minY,
         maxY: maxY,
         lineBarsData: [
-          LineChartBarData(spots: medianSpots, isCurved: true, color: const Color(0xFFF59E0B), barWidth: 2, dotData: const FlDotData(show: false)),
-          LineChartBarData(spots: minus2Spots, isCurved: true, color: const Color(0xFFDC2626), barWidth: 1.5, dashArray: [6, 4], dotData: const FlDotData(show: false)),
+          LineChartBarData(
+            spots: medianSpots,
+            isCurved: true,
+            color: const Color(0xFFF59E0B),
+            barWidth: 2,
+            dotData: const FlDotData(show: false),
+          ),
+          LineChartBarData(
+            spots: minus2Spots,
+            isCurved: true,
+            color: AppColors.danger,
+            barWidth: 1.5,
+            dashArray: [6, 4],
+            dotData: const FlDotData(show: false),
+          ),
           if (childSpots.isNotEmpty)
             LineChartBarData(
               spots: childSpots,
               isCurved: true,
-              color: const Color(0xFF1B5E20),
+              color: AppColors.primary,
               barWidth: 3,
-              dotData: FlDotData(show: true, getDotPainter: (spot, percent, bar, index) => FlDotCirclePainter(radius: 4, color: const Color(0xFF1B5E20), strokeWidth: 2, strokeColor: Colors.white)),
+              dotData: FlDotData(
+                show: true,
+                getDotPainter: (spot, percent, bar, index) =>
+                    FlDotCirclePainter(
+                      radius: 4,
+                      color: AppColors.primary,
+                      strokeWidth: 2,
+                      strokeColor: Colors.white,
+                    ),
+              ),
             ),
         ],
         lineTouchData: LineTouchData(
           touchTooltipData: LineTouchTooltipData(
-            getTooltipItems: (touched) => touched.map((s) {
-              if (s.barIndex == 2 && s.bar.spots.length > s.spotIndex) {
-                return LineTooltipItem('${s.y.toStringAsFixed(1)} $unit', GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white));
-              }
-              return null;
+            getTooltipItems: (touched) => touched.map((spot) {
+              if (spot.barIndex != childBarIndex) return null;
+              return LineTooltipItem(
+                '${spot.y.toStringAsFixed(1)} $unit',
+                GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              );
             }).toList(),
           ),
         ),
@@ -498,54 +1005,403 @@ class _WhoChart extends StatelessWidget {
     );
   }
 
-  double _ageAt(DateTime measured, DateTime birth) => (measured.difference(birth).inDays / 30.44).clamp(6, 60).toDouble();
+  double _ageAt(DateTime measured, DateTime birth) =>
+      (measured.difference(birth).inDays / 30.44).clamp(0, 60).toDouble();
 }
 
-class _MpasiGuide extends StatelessWidget {
-  final int ageMonths;
-  final String statusLabel;
-  final bool isNormal;
-  const _MpasiGuide({required this.ageMonths, required this.statusLabel, required this.isNormal});
+class _HistorySection extends StatelessWidget {
+  final Child child;
+  final List<ChildMeasurement> measurements;
+  final bool loading;
+  final String? error;
+  final VoidCallback onAdd;
+  final VoidCallback onRetry;
+
+  const _HistorySection({
+    required this.child,
+    required this.measurements,
+    required this.loading,
+    required this.error,
+    required this.onAdd,
+    required this.onRetry,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: const Color(0xFFF3F4F6))),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(color: const Color(0xFFFEF3C7), borderRadius: BorderRadius.circular(8)),
-                child: const Icon(Icons.menu_book_rounded, size: 18, color: Color(0xFFD97706)),
-              ),
-              const SizedBox(width: 10),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Pedoman Gizi MPASI', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700, color: const Color(0xFF111827))),
-                    Text('Standar Kemenkes RI untuk Usia $ageMonths Bulan', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: const Color(0xFF6B7280))),
-                  ],
+                child: Text(
+                  'Riwayat pengukuran',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.ink,
+                  ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                decoration: BoxDecoration(color: const Color(0xFFEFF6FF), borderRadius: BorderRadius.circular(20)),
-                child: Text('2 Porsi/Hari', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w700, color: const Color(0xFF1D4ED8))),
+              if (measurements.isNotEmpty)
+                Text(
+                  '${measurements.length} catatan',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    color: AppColors.textGrey,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          if (loading)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              ),
+            )
+          else if (error != null)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  error!,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    color: AppColors.danger,
+                  ),
+                ),
+                TextButton(
+                  onPressed: onRetry,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(0, 44),
+                    foregroundColor: AppColors.primary,
+                  ),
+                  child: const Text('Coba lagi'),
+                ),
+              ],
+            )
+          else if (measurements.isEmpty)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Belum ada pengukuran. Catat berat, tinggi, atau lingkar '
+                  'kepala untuk mulai memantau pertumbuhan.',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    color: AppColors.textGrey,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton(
+                  onPressed: onAdd,
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(0, 44),
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.border),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text('Catat pengukuran pertama'),
+                ),
+              ],
+            )
+          else
+            for (final measurement in measurements.reversed)
+              _MeasurementRow(child: child, measurement: measurement),
+        ],
+      ),
+    );
+  }
+}
+
+class _MeasurementRow extends StatelessWidget {
+  final Child child;
+  final ChildMeasurement measurement;
+
+  const _MeasurementRow({required this.child, required this.measurement});
+
+  @override
+  Widget build(BuildContext context) {
+    final values = <String>[
+      if (measurement.weight != null) 'BB ${_fmt(measurement.weight!)} kg',
+      if (measurement.height != null) 'TB ${_fmt(measurement.height!)} cm',
+      if (measurement.headCircumference != null)
+        'LK ${_fmt(measurement.headCircumference!)} cm',
+    ];
+    
+    final ageInMonths = measurement.measuredAt.difference(child.birthDate).inDays ~/ 30;
+    final gender = child.gender;
+    
+    GrowthStatus? weightStatus;
+    GrowthStatus? heightStatus;
+    
+    if (measurement.weight != null && ageInMonths >= 0 && ageInMonths <= 60) {
+      final zScore = WHOStandards.calculateWeightForAge(
+        weightKg: measurement.weight!,
+        ageInMonths: ageInMonths,
+        gender: gender,
+      );
+      weightStatus = WHOStandards.interpretWeightForAge(zScore);
+    }
+    
+    if (measurement.height != null && ageInMonths >= 0 && ageInMonths <= 60) {
+      final zScore = WHOStandards.calculateHeightForAge(
+        heightCm: measurement.height!,
+        ageInMonths: ageInMonths,
+        gender: gender,
+      );
+      heightStatus = WHOStandards.interpretHeightForAge(zScore);
+    }
+    
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  DateFormat('d MMM yyyy', 'id').format(measurement.measuredAt),
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.ink,
+                  ),
+                ),
+              ),
+              Text(
+                values.isEmpty ? 'Tanpa ukuran' : values.join(' · '),
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  color: AppColors.inkSoft,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            isNormal
-                ? 'Prioritas Pertahankan: Berikan minimal 2 porsi protein hewani setiap hari untuk menjaga sintesis hormon pertumbuhan & kepadatan tulang.'
-                : 'Prioritas Percepatan Tinggi: Berikan minimal 2 porsi protein hewani setiap hari untuk mengejar ketertinggalan pertumbuhan & kepadatan tulang.',
-            style: GoogleFonts.plusJakartaSans(fontSize: 12, color: const Color(0xFF374151), height: 1.5),
+          if (weightStatus != null || heightStatus != null) ...[
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: _getStatusBgColor(weightStatus?.level ?? heightStatus?.level),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: _getStatusBorderColor(weightStatus?.level ?? heightStatus?.level),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (weightStatus != null) ...[
+                    Row(
+                      children: [
+                        Icon(
+                          _getStatusIcon(weightStatus.level),
+                          size: 14,
+                          color: _getStatusColor(weightStatus.level),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'BB/U: ${weightStatus.label}',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: _getStatusColor(weightStatus.level),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      weightStatus.description,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 10,
+                        color: AppColors.inkSoft,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                  if (weightStatus != null && heightStatus != null)
+                    const SizedBox(height: 8),
+                  if (heightStatus != null) ...[
+                    Row(
+                      children: [
+                        Icon(
+                          _getStatusIcon(heightStatus.level),
+                          size: 14,
+                          color: _getStatusColor(heightStatus.level),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'TB/U: ${heightStatus.label}',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: _getStatusColor(heightStatus.level),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      heightStatus.description,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 10,
+                        color: AppColors.inkSoft,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+          if (measurement.notes != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                measurement.notes!,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  color: AppColors.textGrey,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Color _getStatusColor(GrowthLevel? level) {
+    switch (level) {
+      case GrowthLevel.severe:
+        return const Color(0xFFB91C1C);
+      case GrowthLevel.warning:
+        return const Color(0xFFD97706);
+      case GrowthLevel.normal:
+        return const Color(0xFF15803D);
+      default:
+        return AppColors.textGrey;
+    }
+  }
+
+  Color _getStatusBgColor(GrowthLevel? level) {
+    switch (level) {
+      case GrowthLevel.severe:
+        return const Color(0xFFFEE2E2);
+      case GrowthLevel.warning:
+        return const Color(0xFFFEF3C7);
+      case GrowthLevel.normal:
+        return const Color(0xFFDCFCE7);
+      default:
+        return const Color(0xFFF3F4F6);
+    }
+  }
+
+  Color _getStatusBorderColor(GrowthLevel? level) {
+    switch (level) {
+      case GrowthLevel.severe:
+        return const Color(0xFFFECACA);
+      case GrowthLevel.warning:
+        return const Color(0xFFFDE68A);
+      case GrowthLevel.normal:
+        return const Color(0xFFBBF7D0);
+      default:
+        return const Color(0xFFE5E7EB);
+    }
+  }
+
+  IconData _getStatusIcon(GrowthLevel? level) {
+    switch (level) {
+      case GrowthLevel.severe:
+        return Icons.error_outline;
+      case GrowthLevel.warning:
+        return Icons.warning_amber_rounded;
+      case GrowthLevel.normal:
+        return Icons.check_circle_outline;
+      default:
+        return Icons.info_outline;
+    }
+  }
+
+  static String _fmt(double value) => value == value.roundToDouble()
+      ? value.toStringAsFixed(0)
+      : value.toStringAsFixed(1);
+}
+
+class _MpasiGuide extends StatelessWidget {
+  final int ageMonths;
+
+  const _MpasiGuide({required this.ageMonths});
+
+  @override
+  Widget build(BuildContext context) {
+    final String body;
+    if (ageMonths < 6) {
+      body =
+          'ASI eksklusif sampai 6 bulan. Pengukuran rutin tetap dicatat untuk '
+          'melihat pertumbuhan.';
+    } else if (ageMonths < 24) {
+      body =
+          'MPASI dimulai usia 6 bulan sambil melanjutkan ASI sampai 2 tahun. '
+          'Sertakan sumber protein hewani pada menu harian.';
+    } else {
+      body =
+          'Teruskan pola makan keluarga dengan gizi seimbang dan pantau '
+          'pertumbuhan secara berkala.';
+    }
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.accentOrangeBg,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFFED7AA)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.menu_book_rounded,
+            size: 18,
+            color: AppColors.accentOrangeText,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Panduan MPASI',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.accentOrangeText,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  body,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    color: AppColors.inkSoft,
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -553,49 +1409,12 @@ class _MpasiGuide extends StatelessWidget {
   }
 }
 
-class _FoodRecs extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(child: _FoodCard(icon: Icons.egg_alt, title: 'Telur Ayam', subtitle: 'Kolin & DHA', color: const Color(0xFFFEF3C7))),
-        const SizedBox(width: 8),
-        Expanded(child: _FoodCard(icon: Icons.set_meal, title: 'Ikan Kembung', subtitle: 'Omega-3 & Kalium', color: const Color(0xFFDBEAFE))),
-        const SizedBox(width: 8),
-        Expanded(child: _FoodCard(icon: Icons.restaurant, title: 'Daging Sapi', subtitle: 'Zat Besi Heme', color: const Color(0xFFFEE2E2))),
-      ],
-    );
-  }
-}
-
-class _FoodCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Color color;
-  const _FoodCard({required this.icon, required this.title, required this.subtitle, required this.color});
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFFF3F4F6))),
-      child: Column(
-        children: [
-          Container(width: 36, height: 36, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(10)), child: Icon(icon, size: 18, color: const Color(0xFF374151))),
-          const SizedBox(height: 8),
-          Text(title, style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700, color: const Color(0xFF111827))),
-          Text(subtitle, style: GoogleFonts.plusJakartaSans(fontSize: 10, color: const Color(0xFF6B7280))),
-        ],
-      ),
-    );
-  }
-}
-
-// WHO 2006 approximate median & -2SD for height-for-age (cm) & weight-for-age (kg)
+// WHO 2006 approximate median and -2SD, rounded, ages 6 to 36 months.
 class _WhoPoint {
   final int age;
   final double median;
   final double minus2;
+
   const _WhoPoint(this.age, this.median, this.minus2);
 }
 
@@ -616,39 +1435,18 @@ List<_WhoPoint> _whoWeightTable(String gender) {
   ];
 }
 
-List<_WhoPoint> _whoTable(String gender) {
-  final isBoy = gender == 'male';
+List<_WhoPoint> _whoTable() {
   return [
-    _WhoPoint(6, isBoy ? 67.6 : 65.7, isBoy ? 63.3 : 61.5),
-    _WhoPoint(9, isBoy ? 72.0 : 70.1, isBoy ? 67.5 : 65.6),
-    _WhoPoint(12, isBoy ? 75.7 : 74.0, isBoy ? 71.0 : 69.3),
-    _WhoPoint(15, isBoy ? 79.1 : 77.5, isBoy ? 74.1 : 72.4),
-    _WhoPoint(18, isBoy ? 82.3 : 80.7, isBoy ? 76.9 : 75.2),
-    _WhoPoint(21, isBoy ? 85.0 : 83.4, isBoy ? 79.4 : 77.8),
-    _WhoPoint(24, isBoy ? 87.1 : 85.5, isBoy ? 81.3 : 79.8),
-    _WhoPoint(27, isBoy ? 88.8 : 87.3, isBoy ? 82.9 : 81.4),
-    _WhoPoint(30, isBoy ? 90.7 : 89.2, isBoy ? 84.7 : 83.2),
-    _WhoPoint(33, isBoy ? 92.5 : 91.0, isBoy ? 86.3 : 84.9),
-    _WhoPoint(36, isBoy ? 95.4 : 94.1, isBoy ? 89.1 : 87.8),
+    _WhoPoint(6, 67.6, 63.3),
+    _WhoPoint(9, 72.0, 67.5),
+    _WhoPoint(12, 75.7, 71.0),
+    _WhoPoint(15, 79.1, 74.1),
+    _WhoPoint(18, 82.3, 76.9),
+    _WhoPoint(21, 85.0, 79.4),
+    _WhoPoint(24, 87.1, 81.3),
+    _WhoPoint(27, 88.8, 82.9),
+    _WhoPoint(30, 90.7, 84.7),
+    _WhoPoint(33, 92.5, 86.3),
+    _WhoPoint(36, 95.4, 89.1),
   ];
-}
-
-double _whoMedian(String gender, int ageMonths) {
-  final t = _whoTable(gender);
-  for (int i = t.length - 1; i >= 0; i--) if (ageMonths >= t[i].age) return t[i].median;
-  return t.first.median;
-}
-
-double _whoMinus2Sd(String gender, int ageMonths) {
-  final t = _whoTable(gender);
-  for (int i = t.length - 1; i >= 0; i--) if (ageMonths >= t[i].age) return t[i].minus2;
-  return t.first.minus2;
-}
-
-double _zScore(Child child, double height) {
-  final age = child.ageInMonths;
-  final median = _whoMedian(child.gender, age);
-  final sd = (median - _whoMinus2Sd(child.gender, age)) / 2;
-  if (sd == 0) return 0;
-  return (height - median) / sd;
 }

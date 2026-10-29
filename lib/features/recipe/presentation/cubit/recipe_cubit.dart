@@ -36,12 +36,14 @@ class RecipeCubit extends Cubit<RecipeState> {
     List<int> ingredientIds, {
     String? forWhom,
     List<String>? restrictions,
+    int? servings,
   }) async {
     emit(RecipeGenerating());
     final result = await generateRecipeUsecase(
       ingredientIds,
       forWhom: forWhom,
       restrictions: restrictions,
+      servings: servings,
     );
     result.fold(
       (failure) => emit(RecipeFailure(failure.message)),

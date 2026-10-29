@@ -4,10 +4,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/hpk.dart';
 import '../../../../injection_container.dart';
 import '../../domain/entities/pregnancy.dart';
 import '../cubit/pregnancy_cubit.dart';
 import '../cubit/pregnancy_state.dart';
+import 'birth_form_page.dart';
 import 'pregnancy_form_page.dart';
 
 /// Profil kehamilan: sumber data 270 hari pertama dari 1000 HPK.
@@ -87,7 +89,7 @@ class _PregnancyView extends StatelessWidget {
             return _Message(
               icon: Icons.pregnant_woman,
               title: 'Belum ada data kehamilan',
-              body: 'Isi tanggal HPHT (hari pertama haid terakhir) supaya usia kehamilan, trimester, dan perkiraan hari lahir terhitung otomatis.',
+              body: 'Isi tanggal HPHT (hari pertama haid terakhir). Usia kehamilan, trimester, HPL, dan progres 1000 HPK dihitung otomatis dari tanggal itu.',
               actionLabel: 'Tambah data kehamilan',
               onAction: () => _openForm(context),
             );
@@ -105,10 +107,10 @@ class _PregnancyView extends StatelessWidget {
                 SizedBox(
                   height: 52,
                   child: ElevatedButton.icon(
-                    onPressed: () => _openForm(context, pregnancy),
-                    icon: const Icon(Icons.edit_outlined, size: 18),
+                    onPressed: () => _openBirthForm(context, pregnancy),
+                    icon: const Icon(Icons.child_friendly, size: 18),
                     label: Text(
-                      'Perbarui data',
+                      'Catat kelahiran',
                       style: GoogleFonts.plusJakartaSans(
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
@@ -128,10 +130,10 @@ class _PregnancyView extends StatelessWidget {
                 SizedBox(
                   height: 52,
                   child: OutlinedButton.icon(
-                    onPressed: () => _confirmDelivered(context, pregnancy),
-                    icon: const Icon(Icons.child_friendly, size: 18),
+                    onPressed: () => _openForm(context, pregnancy),
+                    icon: const Icon(Icons.edit_outlined, size: 18),
                     label: Text(
-                      'Tandai sudah melahirkan',
+                      'Perbarui data',
                       style: GoogleFonts.plusJakartaSans(
                         fontWeight: FontWeight.w700,
                       ),
@@ -184,50 +186,14 @@ class _PregnancyView extends StatelessWidget {
     );
   }
 
-  Future<void> _confirmDelivered(
-    BuildContext context,
-    Pregnancy pregnancy,
-  ) async {
-    final cubit = context.read<PregnancyCubit>();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(
-          'Tandai sudah melahirkan?',
-          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
-        ),
-        content: Text(
-          'Status kehamilan ditutup dan tersimpan sebagai riwayat. Profil anak bisa ditambahkan dari halaman profil.',
-          style: GoogleFonts.plusJakartaSans(fontSize: 13, height: 1.5),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(
-              'Batal',
-              style: GoogleFonts.plusJakartaSans(
-                color: AppColors.textGrey,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              'Ya, sudah lahir',
-              style: GoogleFonts.plusJakartaSans(
-                color: AppColors.success,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
+  Future<void> _openBirthForm(BuildContext context, Pregnancy pregnancy) async {
+    final created = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (_) => BirthFormPage(pregnancy: pregnancy)),
     );
-
-    if (confirmed != true || !context.mounted) return;
-    final error = await cubit.markAsDelivered(pregnancy.id);
-    if (error != null && context.mounted) _snack(context, error);
+    if (created == true && context.mounted) {
+      Navigator.pop(context, true);
+    }
   }
 
   Future<void> _confirmDelete(BuildContext context, Pregnancy pregnancy) async {
@@ -293,7 +259,7 @@ class _StatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progress = pregnancy.progressPercent / 100;
+    final progress = pregnancy.hpkProgress;
 
     return Container(
       width: double.infinity,
@@ -358,7 +324,7 @@ class _StatusCard extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
-              value: progress.clamp(0.0, 1.0),
+              value: progress,
               minHeight: 8,
               backgroundColor: Colors.white24,
               valueColor: const AlwaysStoppedAnimation(Colors.white),
@@ -368,7 +334,7 @@ class _StatusCard extends StatelessWidget {
           Row(
             children: [
               Text(
-                'Hari ${pregnancy.ageInDays} dari ${Pregnancy.gestationDays}',
+                'Hari ${pregnancy.hpkDay} dari 1000 HPK',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
                   color: Colors.white,
@@ -376,7 +342,7 @@ class _StatusCard extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                '${pregnancy.progressPercent.toStringAsFixed(0)}%',
+                '${(progress * 100).round()}%',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -416,7 +382,7 @@ class _FactsCard extends StatelessWidget {
           const Divider(height: 24, color: AppColors.hairline),
           _Fact(
             icon: Icons.hourglass_bottom,
-            label: 'Sisa waktu',
+            label: 'Sisa waktu ke HPL',
             value: '${pregnancy.daysRemaining} hari',
             highlighted: true,
           ),
@@ -426,6 +392,23 @@ class _FactsCard extends StatelessWidget {
             label: 'HPHT',
             value: DateFormat('d MMMM yyyy', 'id').format(pregnancy.hphtDate),
           ),
+          const Divider(height: 24, color: AppColors.hairline),
+          _Fact(
+            icon: Icons.flag_outlined,
+            label: 'Akhir 1000 HPK',
+            value: DateFormat(
+              'd MMMM yyyy',
+              'id',
+            ).format(hpkEndDate(pregnancy.hphtDate)),
+          ),
+          if (pregnancy.notes != null && pregnancy.notes!.isNotEmpty) ...[
+            const Divider(height: 24, color: AppColors.hairline),
+            _Fact(
+              icon: Icons.notes_outlined,
+              label: 'Catatan',
+              value: pregnancy.notes!,
+            ),
+          ],
         ],
       ),
     );

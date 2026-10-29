@@ -47,7 +47,7 @@ void main() {
 
       expect(json['name'], 'Rayyan');
       expect(json['gender'], 'male');
-      expect(json['birth_date'], '2024-03-15T00:00:00.000');
+      expect(json['birth_date'], '2024-03-15');
     });
   });
 

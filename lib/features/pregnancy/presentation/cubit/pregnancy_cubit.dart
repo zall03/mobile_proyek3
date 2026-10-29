@@ -9,6 +9,7 @@ class PregnancyCubit extends Cubit<PregnancyState> {
   final GetAllPregnanciesUsecase getAll;
   final SavePregnancyUsecase save;
   final MarkPregnancyDeliveredUsecase markDelivered;
+  final RegisterBirthUsecase registerBirthUsecase;
   final DeletePregnancyUsecase deletePregnancy;
 
   PregnancyCubit({
@@ -16,6 +17,7 @@ class PregnancyCubit extends Cubit<PregnancyState> {
     required this.getAll,
     required this.save,
     required this.markDelivered,
+    required this.registerBirthUsecase,
     required this.deletePregnancy,
   }) : super(PregnancyInitial());
 
@@ -39,17 +41,21 @@ class PregnancyCubit extends Cubit<PregnancyState> {
   Future<bool> saveProfile({
     required String motherName,
     required DateTime hphtDate,
+    DateTime? hplDate,
+    String? notes,
     String? id,
   }) async {
     emit(PregnancySaving(await _current()));
     final result = await save(
       motherName: motherName,
       hphtDate: hphtDate,
+      hplDate: hplDate,
+      notes: notes,
       id: id,
     );
 
-    return await result.fold(
-      (failure) async {
+    return result.fold(
+      (failure) {
         emit(PregnancyFailure(failure.message));
         return false;
       },
@@ -58,6 +64,35 @@ class PregnancyCubit extends Cubit<PregnancyState> {
         return true;
       },
     );
+  }
+
+  /// Mengembalikan pesan error, atau null bila berhasil.
+  Future<String?> registerBirth({
+    required String id,
+    required DateTime deliveryDate,
+    required String babyName,
+    required String gender,
+    double? birthWeightKg,
+    double? birthLengthCm,
+    double? birthHeadCircumferenceCm,
+    String? notes,
+  }) async {
+    emit(PregnancySaving(await _current()));
+    final result = await registerBirthUsecase(
+      id: id,
+      deliveryDate: deliveryDate,
+      babyName: babyName,
+      gender: gender,
+      birthWeightKg: birthWeightKg,
+      birthLengthCm: birthLengthCm,
+      birthHeadCircumferenceCm: birthHeadCircumferenceCm,
+      notes: notes,
+    );
+
+    return result.fold((failure) => failure.message, (_) async {
+      await load();
+      return null;
+    });
   }
 
   /// Mengembalikan pesan error, atau null bila berhasil. Kegagalan di sini

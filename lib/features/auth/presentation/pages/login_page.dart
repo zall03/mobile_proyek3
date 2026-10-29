@@ -8,6 +8,7 @@ import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../home/presentation/pages/home_page.dart';
+import 'forgot_password_page.dart';
 import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -269,184 +270,195 @@ class _LoginPageState extends State<LoginPage> {
                                         ),
                                       ),
                                       const SizedBox(width: 6),
-                                       Text(
-                                         'Ingat Saya',
-                                         style: GoogleFonts.poppins(
-                                           fontSize: 13,
-                                           color: AppColors.ink,
-                                         ),
-                                       ),
-                                     ],
-                                   ),
-                                   TextButton(
-                                     onPressed:
-                                         () {}, // TODO: halaman lupa kata sandi
-                                     style: TextButton.styleFrom(
-                                       padding: EdgeInsets.zero,
-                                       minimumSize: Size.zero,
-                                     ),
-                                     child: Text(
-                                       'Lupa Kata Sandi?',
-                                       style: GoogleFonts.poppins(
-                                         fontSize: 13,
-                                         fontWeight: FontWeight.w600,
-                                         color: AppColors.primary,
-                                       ),
-                                     ),
-                                   ),
-                                 ],
-                               ),
-                               const SizedBox(height: 18),
-                               SizedBox(
-                                 width: double.infinity,
-                                 child: ElevatedButton(
-                                   onPressed: isLoading
-                                       ? null
-                                       : () => _handleLogin(context),
-                                   style: ElevatedButton.styleFrom(
-                                     backgroundColor: AppColors.primary,
-                                     foregroundColor: Colors.white,
-                                     minimumSize: const Size.fromHeight(52),
-                                     shape: RoundedRectangleBorder(
-                                       borderRadius: BorderRadius.circular(14),
-                                     ),
-                                   ),
-                                   child: isLoading
-                                       ? const SizedBox(
-                                           height: 18,
-                                           width: 18,
-                                           child: CircularProgressIndicator(
-                                             strokeWidth: 2,
-                                             color: Colors.white,
-                                           ),
-                                         )
-                                       : Row(
-                                           mainAxisAlignment:
-                                               MainAxisAlignment.center,
-                                           children: [
-                                             Text(
-                                               'Masuk ke Dapur Cerdas',
-                                               style: GoogleFonts.poppins(
-                                                 fontWeight: FontWeight.w600,
-                                                 fontSize: 14,
-                                               ),
-                                             ),
-                                           ],
-                                         ),
-                                 ),
-                               ),
-                               const SizedBox(height: 18),
-                               Row(
-                                 children: [
-                                   const Expanded(child: Divider()),
-                                   Padding(
-                                     padding: const EdgeInsets.symmetric(
-                                       horizontal: 10,
-                                     ),
-                                     child: Text(
-                                       'ATAU MASUK DENGAN',
-                                       style: GoogleFonts.poppins(
-                                         fontSize: 11,
-                                         color: AppColors.textGrey,
-                                         letterSpacing: 0.5,
-                                       ),
-                                     ),
-                                   ),
-                                   const Expanded(child: Divider()),
-                                 ],
-                               ),
-                               const SizedBox(height: 14),
-                               SizedBox(
-                                 width: double.infinity,
-                                 child: OutlinedButton(
-                                   onPressed: isLoading
-                                       ? null
-                                       : () => _handleGoogleSignIn(context),
-                                   style: OutlinedButton.styleFrom(
-                                     backgroundColor: Colors.white,
-                                     side: BorderSide(color: Colors.grey.shade300),
-                                     padding: const EdgeInsets.symmetric(
-                                       vertical: 14,
-                                     ),
-                                     shape: RoundedRectangleBorder(
-                                       borderRadius: BorderRadius.circular(14),
-                                     ),
-                                   ),
-                                   child: Row(
-                                     mainAxisAlignment: MainAxisAlignment.center,
-                                     children: [
-                                       Container(
-                                         width: 18,
-                                         height: 18,
-                                         decoration: const BoxDecoration(
-                                           shape: BoxShape.circle,
-                                           color: Colors.white,
-                                         ),
-                                         child: ClipOval(
-                                           child: Image.asset(
-                                             'assets/images/google.png',
-                                             width: 18,
-                                             height: 18,
-                                             fit: BoxFit.cover,
-                                           ),
-                                         ),
-                                       ),
-                                       const SizedBox(width: 10),
-                                       Text(
-                                         'Masuk dengan Google',
-                                         style: GoogleFonts.poppins(
-                                           fontSize: 13,
-                                           fontWeight: FontWeight.w600,
-                                           color: AppColors.ink,
-                                         ),
-                                       ),
-                                     ],
-                                   ),
-                                 ),
-                               ),
-                             ],
-                           ),
-                         ),
-                       ),
-                       const SizedBox(height: 20),
-                       Center(
-                         child: RichText(
-                           text: TextSpan(
-                             style: GoogleFonts.poppins(
-                               fontSize: 13,
-                               color: AppColors.ink,
-                             ),
-                             children: [
-                               const TextSpan(text: 'Belum punya akun Bunda? '),
-                               TextSpan(
-                                 text: 'Daftar Sekarang ',
-                                 style: GoogleFonts.poppins(
-                                   fontWeight: FontWeight.w700,
-                                   color: AppColors.primary,
-                                 ),
-                                 recognizer: TapGestureRecognizer()
-                                   ..onTap = () => Navigator.push(
-                                     context,
-                                     MaterialPageRoute(
-                                       builder: (_) => const RegisterPage(),
-                                     ),
-                                   ),
-                               ),
-                             ],
-                           ),
-                         ),
-                       ),
-                       const SizedBox(height: 24),
-                     ],
-                   ),
-                 ),
-               ),
-             ),
-           );
-         },
-       ),
-     );
-   }
+                                      Text(
+                                        'Ingat Saya',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 13,
+                                          color: AppColors.ink,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => ForgotPasswordPage(
+                                            initialEmail: _emailController.text
+                                                .trim(),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    style: TextButton.styleFrom(
+                                      padding: EdgeInsets.zero,
+                                      minimumSize: Size.zero,
+                                    ),
+                                    child: Text(
+                                      'Lupa Kata Sandi?',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 18),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: isLoading
+                                      ? null
+                                      : () => _handleLogin(context),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.primary,
+                                    foregroundColor: Colors.white,
+                                    minimumSize: const Size.fromHeight(52),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                  ),
+                                  child: isLoading
+                                      ? const SizedBox(
+                                          height: 18,
+                                          width: 18,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              'Masuk ke Dapur Cerdas',
+                                              style: GoogleFonts.poppins(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                ),
+                              ),
+                              const SizedBox(height: 18),
+                              Row(
+                                children: [
+                                  const Expanded(child: Divider()),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                    ),
+                                    child: Text(
+                                      'ATAU MASUK DENGAN',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 11,
+                                        color: AppColors.textGrey,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                  const Expanded(child: Divider()),
+                                ],
+                              ),
+                              const SizedBox(height: 14),
+                              SizedBox(
+                                width: double.infinity,
+                                child: OutlinedButton(
+                                  onPressed: isLoading
+                                      ? null
+                                      : () => _handleGoogleSignIn(context),
+                                  style: OutlinedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    side: BorderSide(
+                                      color: Colors.grey.shade300,
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 14,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        width: 18,
+                                        height: 18,
+                                        decoration: const BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.white,
+                                        ),
+                                        child: ClipOval(
+                                          child: Image.asset(
+                                            'assets/images/google.png',
+                                            width: 18,
+                                            height: 18,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Text(
+                                        'Masuk dengan Google',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.ink,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Center(
+                        child: RichText(
+                          text: TextSpan(
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              color: AppColors.ink,
+                            ),
+                            children: [
+                              const TextSpan(text: 'Belum punya akun Bunda? '),
+                              TextSpan(
+                                text: 'Daftar Sekarang ',
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.primary,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const RegisterPage(),
+                                    ),
+                                  ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 
   TextStyle _labelStyle() => GoogleFonts.poppins(
     fontSize: 13,
@@ -461,7 +473,10 @@ class _LoginPageState extends State<LoginPage> {
         prefixIcon: Icon(icon, size: 19, color: AppColors.textGrey),
         filled: true,
         fillColor: AppColors.bgGradientStart,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: AppColors.border),
@@ -472,10 +487,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(
-            color: AppColors.primary,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),

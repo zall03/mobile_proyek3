@@ -38,6 +38,7 @@ class RecipeRemoteDatasource {
     List<int> ingredientIds, {
     String? forWhom,
     List<String>? restrictions,
+    int? servings,
   }) async {
     try {
       final data = <String, dynamic>{'ingredient_ids': ingredientIds};
@@ -47,10 +48,10 @@ class RecipeRemoteDatasource {
       if (restrictions != null && restrictions.isNotEmpty) {
         data['restrictions'] = restrictions;
       }
-      final response = await dio.post(
-        '/recipes/generate',
-        data: data,
-      );
+      if (servings != null && servings > 0) {
+        data['servings'] = servings;
+      }
+      final response = await dio.post('/recipes/generate', data: data);
       return RecipeModel.fromJson(
         response.data['data'] as Map<String, dynamic>,
       );

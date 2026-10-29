@@ -153,14 +153,62 @@ class _TargetGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = [
-      _TargetValue(label: 'Energi', value: targets.calories, unit: 'kkal', icon: Icons.local_fire_department, color: const Color(0xFFE65100)),
-      _TargetValue(label: 'Protein', value: targets.proteinG, unit: 'g', icon: Icons.egg_alt, color: const Color(0xFF2E7D32)),
-      _TargetValue(label: 'Lemak', value: targets.fatG, unit: 'g', icon: Icons.water_drop, color: const Color(0xFFF9A825)),
-      _TargetValue(label: 'Karbohidrat', value: targets.carbsG, unit: 'g', icon: Icons.grain, color: const Color(0xFF6D4C41)),
-      _TargetValue(label: 'Zat Besi', value: targets.ironMg, unit: 'mg', icon: Icons.healing, color: const Color(0xFFC62828)),
-      _TargetValue(label: 'Zinc', value: targets.zincMg, unit: 'mg', icon: Icons.spa, color: const Color(0xFF00838F)),
-      _TargetValue(label: 'Vitamin A', value: targets.vitaminAMcg, unit: 'mcg', icon: Icons.visibility, color: const Color(0xFF7B1FA2)),
-      _TargetValue(label: 'Vitamin C', value: targets.vitaminCMg, unit: 'mg', icon: Icons.health_and_safety, color: const Color(0xFFEF6C00)),
+      _TargetValue(
+        label: 'Energi',
+        value: targets.calories,
+        unit: 'kkal',
+        icon: Icons.local_fire_department,
+        color: const Color(0xFFE65100),
+      ),
+      _TargetValue(
+        label: 'Protein',
+        value: targets.proteinG,
+        unit: 'g',
+        icon: Icons.egg_alt,
+        color: const Color(0xFF2E7D32),
+      ),
+      _TargetValue(
+        label: 'Lemak',
+        value: targets.fatG,
+        unit: 'g',
+        icon: Icons.water_drop,
+        color: const Color(0xFFF9A825),
+      ),
+      _TargetValue(
+        label: 'Karbohidrat',
+        value: targets.carbsG,
+        unit: 'g',
+        icon: Icons.grain,
+        color: const Color(0xFF6D4C41),
+      ),
+      _TargetValue(
+        label: 'Zat Besi',
+        value: targets.ironMg,
+        unit: 'mg',
+        icon: Icons.healing,
+        color: const Color(0xFFC62828),
+      ),
+      _TargetValue(
+        label: 'Zinc',
+        value: targets.zincMg,
+        unit: 'mg',
+        icon: Icons.spa,
+        color: const Color(0xFF00838F),
+      ),
+      _TargetValue(
+        label: 'Vitamin A',
+        value: targets.vitaminAMcg,
+        unit: 'mcg',
+        icon: Icons.visibility,
+        color: const Color(0xFF7B1FA2),
+      ),
+      _TargetValue(
+        label: 'Vitamin C',
+        value: targets.vitaminCMg,
+        unit: 'mg',
+        icon: Icons.health_and_safety,
+        color: const Color(0xFFEF6C00),
+      ),
     ];
 
     return GridView.builder(
@@ -242,7 +290,11 @@ class _DailyNote extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.lightbulb_outline, color: Color(0xFFF9A825), size: 20),
+          const Icon(
+            Icons.lightbulb_outline,
+            color: Color(0xFFF9A825),
+            size: 20,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(

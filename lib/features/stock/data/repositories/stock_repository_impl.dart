@@ -43,10 +43,7 @@ class StockRepositoryImpl implements StockRepository {
         categoryId: categoryId,
       );
       final ingredients = ingredientModels
-          .map(
-            (json) =>
-                IngredientModel.fromJson(json as Map<String, dynamic>),
-          )
+          .map((json) => IngredientModel.fromJson(json as Map<String, dynamic>))
           .toList();
       return Right(ingredients);
     } on ServerException catch (e) {

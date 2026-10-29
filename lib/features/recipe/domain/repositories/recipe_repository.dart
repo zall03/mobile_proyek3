@@ -10,5 +10,6 @@ abstract class RecipeRepository {
     List<int> ingredientIds, {
     String? forWhom,
     List<String>? restrictions,
+    int? servings,
   });
 }

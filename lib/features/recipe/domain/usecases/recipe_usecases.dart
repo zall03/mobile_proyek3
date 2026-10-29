@@ -33,11 +33,13 @@ class GenerateRecipeUsecase {
     List<int> ingredientIds, {
     String? forWhom,
     List<String>? restrictions,
+    int? servings,
   }) {
     return repository.generateRecipe(
       ingredientIds,
       forWhom: forWhom,
       restrictions: restrictions,
+      servings: servings,
     );
   }
 }

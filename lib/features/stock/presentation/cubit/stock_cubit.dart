@@ -49,15 +49,12 @@ class StockCubit extends Cubit<StockState> {
       return;
     }
     final result = await getCategoriesUsecase();
-    result.fold(
-      (failure) => emit(StockFailure(failure.message)),
-      (categories) {
-        _categories = categories;
-        if (state is StockLoaded) {
-          emit((state as StockLoaded).copyWith(categories: categories));
-        }
-      },
-    );
+    result.fold((failure) => emit(StockFailure(failure.message)), (categories) {
+      _categories = categories;
+      if (state is StockLoaded) {
+        emit((state as StockLoaded).copyWith(categories: categories));
+      }
+    });
   }
 
   Future<void> searchIngredients(String query) async {

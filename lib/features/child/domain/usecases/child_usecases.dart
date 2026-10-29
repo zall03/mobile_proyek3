@@ -33,11 +33,21 @@ class CreateChildUsecase {
     required String name,
     required String gender,
     required DateTime birthDate,
+    DateTime? hpht,
+    DateTime? hpl,
+    double? birthWeightKg,
+    double? birthLengthCm,
+    double? birthHeadCircumferenceCm,
   }) {
     return repository.createChild(
       name: name,
       gender: gender,
       birthDate: birthDate,
+      hpht: hpht,
+      hpl: hpl,
+      birthWeightKg: birthWeightKg,
+      birthLengthCm: birthLengthCm,
+      birthHeadCircumferenceCm: birthHeadCircumferenceCm,
     );
   }
 }
@@ -52,12 +62,22 @@ class UpdateChildUsecase {
     required String name,
     required String gender,
     required DateTime birthDate,
+    DateTime? hpht,
+    DateTime? hpl,
+    double? birthWeightKg,
+    double? birthLengthCm,
+    double? birthHeadCircumferenceCm,
   }) {
     return repository.updateChild(
       id: id,
       name: name,
       gender: gender,
       birthDate: birthDate,
+      hpht: hpht,
+      hpl: hpl,
+      birthWeightKg: birthWeightKg,
+      birthLengthCm: birthLengthCm,
+      birthHeadCircumferenceCm: birthHeadCircumferenceCm,
     );
   }
 }
@@ -75,7 +95,8 @@ class DeleteChildUsecase {
 class GetMeasurementsUsecase {
   final ChildRepository repository;
   GetMeasurementsUsecase(this.repository);
-  Future<Either<Failure, List<ChildMeasurement>>> call(String childId) => repository.getMeasurements(childId);
+  Future<Either<Failure, List<ChildMeasurement>>> call(String childId) =>
+      repository.getMeasurements(childId);
 }
 
 class AddMeasurementUsecase {
@@ -83,9 +104,17 @@ class AddMeasurementUsecase {
   AddMeasurementUsecase(this.repository);
   Future<Either<Failure, ChildMeasurement>> call({
     required String childId,
-    required double weight,
-    required double height,
     required DateTime measuredAt,
-  }) =>
-      repository.addMeasurement(childId: childId, weight: weight, height: height, measuredAt: measuredAt);
+    double? weight,
+    double? height,
+    double? headCircumference,
+    String? notes,
+  }) => repository.addMeasurement(
+    childId: childId,
+    measuredAt: measuredAt,
+    weight: weight,
+    height: height,
+    headCircumference: headCircumference,
+    notes: notes,
+  );
 }

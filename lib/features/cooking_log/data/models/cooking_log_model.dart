@@ -15,9 +15,7 @@ class CookingLogModel extends CookingLog {
   });
 
   factory CookingLogModel.fromJson(Map<String, dynamic> json) {
-    final recipe = json['recipe'] is Map
-        ? json['recipe'] as Map
-        : null;
+    final recipe = json['recipe'] is Map ? json['recipe'] as Map : null;
 
     int parseInt(dynamic val, [int fallback = 0]) {
       if (val is num) return val.toInt();
@@ -95,23 +93,19 @@ class CookingLogModel extends CookingLog {
   }
 
   static List<StockChange> _stockChanges(dynamic raw) {
-    return ((raw as List<dynamic>?) ?? const [])
-        .map(
-          (item) {
-            double parseD(dynamic v) {
-              if (v is num) return v.toDouble();
-              return double.tryParse(v?.toString() ?? '') ?? 0.0;
-            }
+    return ((raw as List<dynamic>?) ?? const []).map((item) {
+      double parseD(dynamic v) {
+        if (v is num) return v.toDouble();
+        return double.tryParse(v?.toString() ?? '') ?? 0.0;
+      }
 
-            return StockChange(
-              ingredient: item['ingredient']?.toString() ?? 'Bahan',
-              used: parseD(item['used']),
-              from: parseD(item['from']),
-              to: parseD(item['to']),
-              unit: item['unit']?.toString() ?? '',
-            );
-          },
-        )
-        .toList();
+      return StockChange(
+        ingredient: item['ingredient']?.toString() ?? 'Bahan',
+        used: parseD(item['used']),
+        from: parseD(item['from']),
+        to: parseD(item['to']),
+        unit: item['unit']?.toString() ?? '',
+      );
+    }).toList();
   }
 }

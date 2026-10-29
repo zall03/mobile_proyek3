@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/ingredient_image.dart';
 import '../../../../injection_container.dart';
 import '../../../child/domain/entities/child.dart';
+import '../../../child/domain/usecases/child_usecases.dart';
 import '../../../child/presentation/pages/child_detail_page.dart';
 import '../../../recipe/presentation/pages/ai_recipe_result_page.dart';
 import '../../../stock/domain/entities/stock.dart';
@@ -71,8 +72,7 @@ class _NotificationList extends StatelessWidget {
     await Navigator.push(
       ctx,
       MaterialPageRoute(
-        builder: (_) =>
-            AiRecipeResultPage(ingredientIds: [item.ingredient.id]),
+        builder: (_) => AiRecipeResultPage(ingredientIds: [item.ingredient.id]),
       ),
     );
     if (ctx.mounted) ctx.read<NotificationsCubit>().load();
@@ -86,18 +86,31 @@ class _NotificationList extends StatelessWidget {
     if (ctx.mounted) ctx.read<NotificationsCubit>().load();
   }
 
-  Future<void> _openChild(BuildContext ctx, MeasurementReminder reminder) async {
+  Future<void> _openChild(
+    BuildContext ctx,
+    MeasurementReminder reminder,
+  ) async {
+    final result = await sl<GetChildByIdUsecase>().call(reminder.childId);
+    if (!ctx.mounted) return;
+    final child = result.fold<Child?>((failure) {
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(
+          content: Text(
+            failure.message,
+            style: GoogleFonts.plusJakartaSans(fontSize: 13),
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return null;
+    }, (value) => value);
+    if (child == null) return;
+
     await Navigator.push(
       ctx,
       MaterialPageRoute(
-        builder: (_) => ChildDetailPage(
-          child: Child(
-            id: reminder.childId,
-            name: reminder.name,
-            gender: reminder.gender,
-            birthDate: reminder.birthDate,
-          ),
-        ),
+        builder: (_) =>
+            ChildDetailPage(child: child, openMeasurementOnLoad: true),
       ),
     );
     if (ctx.mounted) ctx.read<NotificationsCubit>().load();
@@ -445,10 +458,7 @@ class _MeasureTile extends StatelessWidget {
   final MeasurementReminder reminder;
   final VoidCallback onRecord;
 
-  const _MeasureTile({
-    required this.reminder,
-    required this.onRecord,
-  });
+  const _MeasureTile({required this.reminder, required this.onRecord});
 
   @override
   Widget build(BuildContext context) {

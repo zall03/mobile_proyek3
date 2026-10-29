@@ -14,10 +14,7 @@ class AuthRemoteDatasource {
 
   AuthRemoteDatasource(this.supabase, this.dio);
 
-  Future<void> signIn({
-    required String email,
-    required String password,
-  }) async {
+  Future<void> signIn({required String email, required String password}) async {
     try {
       await supabase.auth.signInWithPassword(email: email, password: password);
     } on AuthException catch (e) {
@@ -64,6 +61,32 @@ class AuthRemoteDatasource {
     try {
       await supabase.auth.resend(type: OtpType.signup, email: email);
       return 'Kode verifikasi baru telah dikirim';
+    } on AuthException catch (e) {
+      throw ServerException(_authMessage(e));
+    }
+  }
+
+  Future<void> sendPasswordResetOtp({required String email}) async {
+    try {
+      await supabase.auth.resetPasswordForEmail(email);
+    } on AuthException catch (e) {
+      throw ServerException(_authMessage(e));
+    }
+  }
+
+  Future<void> resetPassword({
+    required String email,
+    required String otpCode,
+    required String newPassword,
+  }) async {
+    try {
+      await supabase.auth.verifyOTP(
+        type: OtpType.recovery,
+        email: email,
+        token: otpCode,
+      );
+      await supabase.auth.updateUser(UserAttributes(password: newPassword));
+      await supabase.auth.signOut();
     } on AuthException catch (e) {
       throw ServerException(_authMessage(e));
     }

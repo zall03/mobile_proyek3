@@ -6,7 +6,8 @@ import '../config/app_config.dart';
 class DioClient {
   final Dio dio;
 
-  DioClient() : dio = Dio(
+  DioClient()
+    : dio = Dio(
         BaseOptions(
           baseUrl: AppConfig.apiBaseUrl,
           connectTimeout: const Duration(seconds: 30),
@@ -17,7 +18,8 @@ class DioClient {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
-          final token = Supabase.instance.client.auth.currentSession?.accessToken;
+          final token =
+              Supabase.instance.client.auth.currentSession?.accessToken;
           if (token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';
           }

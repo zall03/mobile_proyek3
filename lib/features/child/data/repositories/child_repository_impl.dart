@@ -13,20 +13,18 @@ class ChildRepositoryImpl implements ChildRepository {
   @override
   Future<Either<Failure, List<Child>>> getChildren() async {
     try {
-      final children = await remoteDatasource.getChildren();
-      return Right(children);
+      return Right(await remoteDatasource.getChildren());
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(ServerFailure(_clean(e)));
     }
   }
 
   @override
   Future<Either<Failure, Child>> getChildById(String id) async {
     try {
-      final child = await remoteDatasource.getChildById(id);
-      return Right(child);
+      return Right(await remoteDatasource.getChildById(id));
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(ServerFailure(_clean(e)));
     }
   }
 
@@ -35,16 +33,26 @@ class ChildRepositoryImpl implements ChildRepository {
     required String name,
     required String gender,
     required DateTime birthDate,
+    DateTime? hpht,
+    DateTime? hpl,
+    double? birthWeightKg,
+    double? birthLengthCm,
+    double? birthHeadCircumferenceCm,
   }) async {
     try {
       final child = await remoteDatasource.createChild(
         name: name,
         gender: gender,
         birthDate: birthDate,
+        hpht: hpht,
+        hpl: hpl,
+        birthWeightKg: birthWeightKg,
+        birthLengthCm: birthLengthCm,
+        birthHeadCircumferenceCm: birthHeadCircumferenceCm,
       );
       return Right(child);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(ServerFailure(_clean(e)));
     }
   }
 
@@ -54,6 +62,11 @@ class ChildRepositoryImpl implements ChildRepository {
     required String name,
     required String gender,
     required DateTime birthDate,
+    DateTime? hpht,
+    DateTime? hpl,
+    double? birthWeightKg,
+    double? birthLengthCm,
+    double? birthHeadCircumferenceCm,
   }) async {
     try {
       final child = await remoteDatasource.updateChild(
@@ -61,10 +74,15 @@ class ChildRepositoryImpl implements ChildRepository {
         name: name,
         gender: gender,
         birthDate: birthDate,
+        hpht: hpht,
+        hpl: hpl,
+        birthWeightKg: birthWeightKg,
+        birthLengthCm: birthLengthCm,
+        birthHeadCircumferenceCm: birthHeadCircumferenceCm,
       );
       return Right(child);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(ServerFailure(_clean(e)));
     }
   }
 
@@ -74,37 +92,45 @@ class ChildRepositoryImpl implements ChildRepository {
       await remoteDatasource.deleteChild(id);
       return const Right(null);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(ServerFailure(_clean(e)));
     }
   }
 
   @override
-  Future<Either<Failure, List<ChildMeasurement>>> getMeasurements(String childId) async {
+  Future<Either<Failure, List<ChildMeasurement>>> getMeasurements(
+    String childId,
+  ) async {
     try {
-      final data = await remoteDatasource.getMeasurements(childId);
-      return Right(data);
+      return Right(await remoteDatasource.getMeasurements(childId));
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(ServerFailure(_clean(e)));
     }
   }
 
   @override
   Future<Either<Failure, ChildMeasurement>> addMeasurement({
     required String childId,
-    required double weight,
-    required double height,
     required DateTime measuredAt,
+    double? weight,
+    double? height,
+    double? headCircumference,
+    String? notes,
   }) async {
     try {
-      final m = await remoteDatasource.addMeasurement(
+      final measurement = await remoteDatasource.addMeasurement(
         childId: childId,
+        measuredAt: measuredAt,
         weight: weight,
         height: height,
-        measuredAt: measuredAt,
+        headCircumference: headCircumference,
+        notes: notes,
       );
-      return Right(m);
+      return Right(measurement);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(ServerFailure(_clean(e)));
     }
   }
+
+  static String _clean(Object error) =>
+      error.toString().replaceFirst('Exception: ', '');
 }

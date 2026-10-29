@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../injection_container.dart';
-import '../../../pregnancy/presentation/pages/pregnancy_page.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/change_password_usecase.dart';
@@ -451,15 +450,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     onTap: _showChangePasswordDialog,
                   ),
                   const SizedBox(height: 8),
-                  _ActionTile(
-                    icon: Icons.pregnant_woman,
-                    label: 'Profil Kehamilan',
-                    subtitle: 'Usia kandungan, trimester, perkiraan lahir',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const PregnancyPage()),
-                    ),
-                  ),
                   const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,

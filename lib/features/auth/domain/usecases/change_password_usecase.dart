@@ -9,9 +9,8 @@ class ChangePasswordUsecase {
   Future<Either<Failure, void>> call({
     required String currentPassword,
     required String newPassword,
-  }) =>
-      repository.changePassword(
-        currentPassword: currentPassword,
-        newPassword: newPassword,
-      );
+  }) => repository.changePassword(
+    currentPassword: currentPassword,
+    newPassword: newPassword,
+  );
 }

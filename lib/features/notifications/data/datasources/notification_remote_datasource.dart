@@ -21,7 +21,9 @@ class NotificationRemoteDatasource {
           .map((e) => StockModel.fromJson(e as Map<String, dynamic>))
           .toList();
       final measurementDue = (data['measurement_due'] as List<dynamic>? ?? [])
-          .map((e) => MeasurementReminderModel.fromJson(e as Map<String, dynamic>))
+          .map(
+            (e) => MeasurementReminderModel.fromJson(e as Map<String, dynamic>),
+          )
           .toList();
 
       return NotificationOverview(

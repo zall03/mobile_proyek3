@@ -27,45 +27,83 @@ class ChildCubit extends Cubit<ChildState> {
     );
   }
 
-  Future<void> createChild({
+  Future<bool> createChild({
     required String name,
     required String gender,
     required DateTime birthDate,
+    DateTime? hpht,
+    DateTime? hpl,
+    double? birthWeightKg,
+    double? birthLengthCm,
+    double? birthHeadCircumferenceCm,
   }) async {
     final result = await createChildUsecase(
       name: name,
       gender: gender,
       birthDate: birthDate,
+      hpht: hpht,
+      hpl: hpl,
+      birthWeightKg: birthWeightKg,
+      birthLengthCm: birthLengthCm,
+      birthHeadCircumferenceCm: birthHeadCircumferenceCm,
     );
-    result.fold(
-      (failure) => emit(ChildFailure(failure.message)),
-      (_) => loadChildren(),
+    return result.fold(
+      (failure) {
+        emit(ChildFailure(failure.message));
+        return false;
+      },
+      (_) async {
+        await loadChildren();
+        return true;
+      },
     );
   }
 
-  Future<void> updateChild({
+  Future<bool> updateChild({
     required String id,
     required String name,
     required String gender,
     required DateTime birthDate,
+    DateTime? hpht,
+    DateTime? hpl,
+    double? birthWeightKg,
+    double? birthLengthCm,
+    double? birthHeadCircumferenceCm,
   }) async {
     final result = await updateChildUsecase(
       id: id,
       name: name,
       gender: gender,
       birthDate: birthDate,
+      hpht: hpht,
+      hpl: hpl,
+      birthWeightKg: birthWeightKg,
+      birthLengthCm: birthLengthCm,
+      birthHeadCircumferenceCm: birthHeadCircumferenceCm,
     );
-    result.fold(
-      (failure) => emit(ChildFailure(failure.message)),
-      (_) => loadChildren(),
+    return result.fold(
+      (failure) {
+        emit(ChildFailure(failure.message));
+        return false;
+      },
+      (_) async {
+        await loadChildren();
+        return true;
+      },
     );
   }
 
-  Future<void> deleteChild(String id) async {
+  Future<bool> deleteChild(String id) async {
     final result = await deleteChildUsecase(id);
-    result.fold(
-      (failure) => emit(ChildFailure(failure.message)),
-      (_) => loadChildren(),
+    return result.fold(
+      (failure) {
+        emit(ChildFailure(failure.message));
+        return false;
+      },
+      (_) async {
+        await loadChildren();
+        return true;
+      },
     );
   }
 }

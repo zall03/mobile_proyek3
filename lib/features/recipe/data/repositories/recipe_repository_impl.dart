@@ -35,14 +35,16 @@ class RecipeRepositoryImpl implements RecipeRepository {
     List<int> ingredientIds, {
     String? forWhom,
     List<String>? restrictions,
+    int? servings,
   }) async {
     try {
-      final result = await remoteDatasource.generateRecipe(
+      final recipe = await remoteDatasource.generateRecipe(
         ingredientIds,
         forWhom: forWhom,
         restrictions: restrictions,
+        servings: servings,
       );
-      return Right(result.toEntity());
+      return Right(recipe.toEntity());
     } on Exception catch (e) {
       return Left(ServerFailure(e.toString()));
     }

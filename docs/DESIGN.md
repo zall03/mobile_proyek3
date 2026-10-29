@@ -32,6 +32,7 @@ Sekunder: ayah / pengasuh yang ikut memasak.
 | Nutrisi | Estimasi gizi resep + perbandingan dengan target AKG anak |
 | Pengingat | Bahan hampir kedaluwarsa (in-app list; push FCM menyusul) |
 | Profil anak | Usia, berat, tinggi, target nutrisi (Fase 2); riwayat tumbuh (Fase 3) |
+| 1000 HPK | Kehamilan dari HPHT, kelahiran atomik, profil anak, riwayat pengukuran, pengingat ukur |
 
 ### Batas cakupan (non-goals)
 - Pairing multi-perangkat antar anggota keluarga: di luar MVP.
@@ -197,3 +198,34 @@ serta 9999 chip status dan filter.
 
 Dial ini mengikat seluruh layar: hijau segar terarah sebagai identitas, komposisi dinamis antarseksi,
 dan gerak dibatasi pada hover, tekan, serta transisi singkat (motion 200ms). Tidak ada animasi berulang tanpa pemicu.
+
+## 12. 1000 HPK
+
+Modul Si Kecil memakai kerangka 1000 Hari Pertama Kehidupan. Satu tanggal, HPHT, menjadi sumber
+tunggal untuk usia kehamilan, HPL, dan progres 1000 HPK. Angka tidak disimpan sebagai kolom,
+selalu dihitung di klien dengan `lib/core/utils/hpk.dart`.
+
+**Aturan hitung**
+- Hari HPK ke-1 adalah tanggal HPHT. `hpkDay = daysSince(HPHT) + 1`, dibatasi 1 sampai 1000.
+- Progres = `hpkDay / 1000`, dibatasi 0 sampai 1.
+- Trimester: minggu < 13 = 1, 13 sampai 26 = 2, >= 27 = 3.
+- HPL = HPHT + 280 hari. Akhir HPK = HPHT + 999 hari. Masa HPK selesai setelah tanggal itu lewat.
+- Anak tanpa HPHT memakai perkiraan 280 hari sebelum tanggal lahir, ditandai "HPHT perkiraan".
+
+**Layar**
+- `HpkHubPage` menjadi tab Si Kecil: kartu kehamilan aktif, daftar anak yang dipantau, riwayat
+  yang sudah melewati 1000 hari, dan tombol tambah profil anak.
+- `PregnancyPage` menampilkan progres 1000 HPK dan tombol "Catat kelahiran". `BirthFormPage`
+  menutup kehamilan dan membuat profil anak dalam satu permintaan; bila gagal, keduanya batal.
+- `ChildDetailPage` menampilkan lingkar kepala, catatan, dan seluruh riwayat pengukuran. Kartu
+  statistik hanya menampilkan nilai yang benar-benar diukur. Kurva WHO dibatasi usia 6 sampai 36
+  bulan, dengan catatan bahwa grafik bukan diagnosis.
+- Pengingat ukur muncul bila anak belum pernah diukur atau pengukuran terakhir sudah 30 hari.
+
+**Batas v1**
+- Nutrisi/AKG dan analisis stunting otomatis tidak termasuk v1.
+- Pengingat hanya in-app; push belum dikirim.
+- Klaim diagnosis dihapus. Ambang -2 SD ditampilkan sebagai label deskriptif dengan disclaimer.
+
+**Dial modul**: ENERGY 1 / RHYTHM 2 / MOTION 1. Satu kartu progres sebagai fokus per layar,
+daftar fakta di bawahnya, dan gerak hanya pada transisi state.

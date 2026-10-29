@@ -4,6 +4,8 @@ import '../../domain/usecases/google_sign_in_usecase.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
 import '../../domain/usecases/resend_otp_usecase.dart';
+import '../../domain/usecases/reset_password_usecase.dart';
+import '../../domain/usecases/send_password_reset_otp_usecase.dart';
 import '../../domain/usecases/verify_register_otp_usecase.dart';
 import 'auth_state.dart';
 
@@ -13,6 +15,8 @@ class AuthCubit extends Cubit<AuthState> {
   final VerifyRegisterOtpUsecase verifyOtpUsecase;
   final ResendOtpUsecase resendOtpUsecase;
   final GoogleSignInUsecase googleSignInUsecase;
+  final SendPasswordResetOtpUsecase sendPasswordResetOtpUsecase;
+  final ResetPasswordUsecase resetPasswordUsecase;
 
   AuthCubit({
     required this.loginUsecase,
@@ -20,6 +24,8 @@ class AuthCubit extends Cubit<AuthState> {
     required this.verifyOtpUsecase,
     required this.resendOtpUsecase,
     required this.googleSignInUsecase,
+    required this.sendPasswordResetOtpUsecase,
+    required this.resetPasswordUsecase,
   }) : super(AuthInitial());
 
   Future<void> login({required String email, required String password}) async {
@@ -78,6 +84,32 @@ class AuthCubit extends Cubit<AuthState> {
       (failure) => emit(AuthFailure(failure.message)),
       // null: halaman dialihkan ke Google, sesi menunggu setelah redirect.
       (user) => user == null ? emit(AuthInitial()) : emit(AuthSuccess(user)),
+    );
+  }
+
+  Future<void> sendPasswordResetOtp({required String email}) async {
+    emit(AuthLoading());
+    final result = await sendPasswordResetOtpUsecase(email: email);
+    result.fold(
+      (failure) => emit(AuthFailure(failure.message)),
+      (_) => emit(PasswordResetOtpSent(email)),
+    );
+  }
+
+  Future<void> resetPassword({
+    required String email,
+    required String otpCode,
+    required String newPassword,
+  }) async {
+    emit(AuthLoading());
+    final result = await resetPasswordUsecase(
+      email: email,
+      otpCode: otpCode,
+      newPassword: newPassword,
+    );
+    result.fold(
+      (failure) => emit(AuthFailure(failure.message)),
+      (_) => emit(const PasswordResetSuccess()),
     );
   }
 }

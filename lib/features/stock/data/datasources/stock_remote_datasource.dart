@@ -34,10 +34,7 @@ class StockRemoteDatasource {
     }
   }
 
-  Future<List<dynamic>> fetchStocks({
-    int? categoryId,
-    String? status,
-  }) async {
+  Future<List<dynamic>> fetchStocks({int? categoryId, String? status}) async {
     try {
       final response = await dio.get(
         '/stocks',
@@ -65,9 +62,7 @@ class StockRemoteDatasource {
           'ingredient_id': ingredientId,
           'quantity': quantity,
           'unit': unit,
-          'expiry_date': expiryDate != null
-              ? _toDateString(expiryDate)
-              : null,
+          'expiry_date': expiryDate != null ? _toDateString(expiryDate) : null,
         },
       );
       return response.data['data'] as Map<String, dynamic>;
@@ -88,9 +83,7 @@ class StockRemoteDatasource {
         data: {
           'quantity': quantity,
           'unit': unit,
-          'expiry_date': expiryDate != null
-              ? _toDateString(expiryDate)
-              : null,
+          'expiry_date': expiryDate != null ? _toDateString(expiryDate) : null,
         },
       );
       return response.data['data'] as Map<String, dynamic>;

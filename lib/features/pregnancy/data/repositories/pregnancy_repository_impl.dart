@@ -32,6 +32,8 @@ class PregnancyRepositoryImpl implements PregnancyRepository {
   Future<Either<Failure, Pregnancy>> save({
     required String motherName,
     required DateTime hphtDate,
+    DateTime? hplDate,
+    String? notes,
     String? id,
   }) async {
     try {
@@ -39,11 +41,15 @@ class PregnancyRepositoryImpl implements PregnancyRepository {
           ? await remoteDatasource.create(
               motherName: motherName,
               hphtDate: hphtDate,
+              hplDate: hplDate,
+              notes: notes,
             )
           : await remoteDatasource.update(
               id: id,
               motherName: motherName,
               hphtDate: hphtDate,
+              hplDate: hplDate,
+              notes: notes,
             );
       return Right(saved);
     } catch (e) {
@@ -55,6 +61,34 @@ class PregnancyRepositoryImpl implements PregnancyRepository {
   Future<Either<Failure, Pregnancy>> markDelivered(String id) async {
     try {
       return Right(await remoteDatasource.markDelivered(id));
+    } catch (e) {
+      return Left(ServerFailure(_clean(e)));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> registerBirth({
+    required String id,
+    required DateTime deliveryDate,
+    required String babyName,
+    required String gender,
+    double? birthWeightKg,
+    double? birthLengthCm,
+    double? birthHeadCircumferenceCm,
+    String? notes,
+  }) async {
+    try {
+      await remoteDatasource.registerBirth(
+        id: id,
+        deliveryDate: deliveryDate,
+        babyName: babyName,
+        gender: gender,
+        birthWeightKg: birthWeightKg,
+        birthLengthCm: birthLengthCm,
+        birthHeadCircumferenceCm: birthHeadCircumferenceCm,
+        notes: notes,
+      );
+      return const Right(null);
     } catch (e) {
       return Left(ServerFailure(_clean(e)));
     }

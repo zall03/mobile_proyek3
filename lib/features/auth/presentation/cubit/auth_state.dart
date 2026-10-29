@@ -43,3 +43,14 @@ class OtpVerified extends AuthState {
 class OtpResent extends AuthState {
   const OtpResent();
 }
+
+class PasswordResetOtpSent extends AuthState {
+  final String email;
+  const PasswordResetOtpSent(this.email);
+  @override
+  List<Object?> get props => [email];
+}
+
+class PasswordResetSuccess extends AuthState {
+  const PasswordResetSuccess();
+}

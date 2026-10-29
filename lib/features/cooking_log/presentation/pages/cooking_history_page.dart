@@ -197,8 +197,9 @@ class _HistoryRowState extends State<_HistoryRow> {
             log: log,
             onOpenRecipe: _openRecipeDetail,
           ),
-          crossFadeState:
-              _expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+          crossFadeState: _expanded
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
           duration: const Duration(milliseconds: 200),
         ),
       ],
@@ -297,10 +298,21 @@ class _HistoryDetail extends StatelessWidget {
               spacing: 6,
               runSpacing: 6,
               children: [
-                _NutChip(label: '${log.nutrition!.total.calories.toStringAsFixed(0)} kkal'),
-                _NutChip(label: 'P ${log.nutrition!.total.proteinG.toStringAsFixed(1)} g'),
-                _NutChip(label: 'L ${log.nutrition!.total.fatG.toStringAsFixed(1)} g'),
-                _NutChip(label: 'K ${log.nutrition!.total.carbsG.toStringAsFixed(1)} g'),
+                _NutChip(
+                  label:
+                      '${log.nutrition!.total.calories.toStringAsFixed(0)} kkal',
+                ),
+                _NutChip(
+                  label:
+                      'P ${log.nutrition!.total.proteinG.toStringAsFixed(1)} g',
+                ),
+                _NutChip(
+                  label: 'L ${log.nutrition!.total.fatG.toStringAsFixed(1)} g',
+                ),
+                _NutChip(
+                  label:
+                      'K ${log.nutrition!.total.carbsG.toStringAsFixed(1)} g',
+                ),
               ],
             ),
             const SizedBox(height: 10),

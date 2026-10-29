@@ -22,8 +22,9 @@ class CookingLogRemoteDatasource {
         },
       );
       final data = response.data;
-      final payload =
-          data is Map ? (data['data'] as Map<String, dynamic>?) : null;
+      final payload = data is Map
+          ? (data['data'] as Map<String, dynamic>?)
+          : null;
       if (payload == null) {
         throw Exception('Response server tidak valid');
       }

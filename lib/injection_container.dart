@@ -12,6 +12,8 @@ import 'features/auth/domain/usecases/google_sign_in_usecase.dart';
 import 'features/auth/domain/usecases/login_usecase.dart';
 import 'features/auth/domain/usecases/register_usecase.dart';
 import 'features/auth/domain/usecases/resend_otp_usecase.dart';
+import 'features/auth/domain/usecases/reset_password_usecase.dart';
+import 'features/auth/domain/usecases/send_password_reset_otp_usecase.dart';
 import 'features/auth/domain/usecases/verify_register_otp_usecase.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
 import 'features/stock/data/datasources/stock_remote_datasource.dart';
@@ -34,11 +36,11 @@ import 'features/recipe/data/repositories/recipe_repository_impl.dart';
 import 'features/recipe/domain/repositories/recipe_repository.dart';
 import 'features/recipe/domain/usecases/recipe_usecases.dart';
 import 'features/recipe/presentation/cubit/recipe_cubit.dart';
-import 'features/notifications/data/datasources/notification_remote_datasource.dart';
-import 'features/notifications/data/repositories/notification_repository_impl.dart';
-import 'features/notifications/domain/repositories/notification_repository.dart';
-import 'features/notifications/domain/usecases/get_notifications_usecase.dart';
-import 'features/notifications/presentation/cubit/notifications_cubit.dart';
+import 'features/notification/data/datasources/notification_remote_datasource.dart';
+import 'features/notification/data/repositories/notification_repository_impl.dart';
+import 'features/notification/domain/repositories/notification_repository.dart';
+import 'features/notification/domain/usecases/notification_usecases.dart';
+import 'features/notification/presentation/cubit/notification_cubit.dart';
 import 'features/cooking_log/data/datasources/cooking_log_remote_datasource.dart';
 import 'features/cooking_log/data/repositories/cooking_log_repository_impl.dart';
 import 'features/cooking_log/domain/repositories/cooking_log_repository.dart';
@@ -50,6 +52,7 @@ import 'features/child/data/repositories/child_repository_impl.dart';
 import 'features/child/domain/repositories/child_repository.dart';
 import 'features/child/domain/usecases/child_usecases.dart';
 import 'features/child/presentation/cubit/child_cubit.dart';
+import 'features/child/presentation/cubit/hpk_cubit.dart';
 import 'features/pregnancy/data/datasources/pregnancy_remote_datasource.dart';
 import 'features/pregnancy/data/repositories/pregnancy_repository_impl.dart';
 import 'features/pregnancy/domain/repositories/pregnancy_repository.dart';
@@ -66,13 +69,13 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(
     () => AuthRemoteDatasource(Supabase.instance.client, sl<DioClient>().dio),
   );
-  sl.registerLazySingleton<AuthRepository>(
-    () => AuthRepositoryImpl(sl()),
-  );
+  sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl()));
   sl.registerLazySingleton(() => LoginUsecase(sl()));
   sl.registerLazySingleton(() => RegisterUsecase(sl()));
   sl.registerLazySingleton(() => VerifyRegisterOtpUsecase(sl()));
   sl.registerLazySingleton(() => ResendOtpUsecase(sl()));
+  sl.registerLazySingleton(() => SendPasswordResetOtpUsecase(sl()));
+  sl.registerLazySingleton(() => ResetPasswordUsecase(sl()));
   sl.registerLazySingleton(() => GoogleSignInUsecase(sl()));
   sl.registerLazySingleton(() => GetMeUsecase(sl()));
   sl.registerLazySingleton(() => UpdateMeUsecase(sl()));
@@ -84,6 +87,8 @@ Future<void> initDependencies() async {
       verifyOtpUsecase: sl(),
       resendOtpUsecase: sl(),
       googleSignInUsecase: sl(),
+      sendPasswordResetOtpUsecase: sl(),
+      resetPasswordUsecase: sl(),
     ),
   );
 
@@ -112,7 +117,11 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<HomeRepository>(() => HomeRepositoryImpl(sl()));
   sl.registerLazySingleton(() => GetDashboardSummaryUsecase(sl()));
   sl.registerFactory(
-    () => HomeCubit(getDashboardSummaryUsecase: sl(), getChildrenUsecase: sl()),
+    () => HomeCubit(
+      getDashboardSummaryUsecase: sl(),
+      getChildrenUsecase: sl(),
+      getActivePregnancyUsecase: sl(),
+    ),
   );
 
   // Recipe feature
@@ -129,7 +138,7 @@ Future<void> initDependencies() async {
     ),
   );
 
-  // Notifications feature
+  // Notification feature
   sl.registerLazySingleton(
     () => NotificationRemoteDatasource(sl<DioClient>().dio),
   );
@@ -137,7 +146,13 @@ Future<void> initDependencies() async {
     () => NotificationRepositoryImpl(sl()),
   );
   sl.registerLazySingleton(() => GetNotificationsUsecase(sl()));
-  sl.registerFactory(() => NotificationsCubit(getNotificationsUsecase: sl()));
+  sl.registerLazySingleton(() => MarkNotificationAsReadUsecase(sl()));
+  sl.registerFactory(
+    () => NotificationCubit(
+      getNotificationsUsecase: sl(),
+      markAsReadUsecase: sl(),
+    ),
+  );
 
   // Cooking Log feature
   sl.registerLazySingleton(
@@ -170,6 +185,16 @@ Future<void> initDependencies() async {
       deleteChildUsecase: sl(),
     ),
   );
+  sl.registerFactory(
+    () => HpkCubit(
+      getChildrenUsecase: sl(),
+      createChildUsecase: sl(),
+      updateChildUsecase: sl(),
+      deleteChildUsecase: sl(),
+      getActivePregnancyUsecase: sl(),
+      getAllPregnanciesUsecase: sl(),
+    ),
+  );
 
   // Pregnancy feature
   sl.registerLazySingleton(
@@ -182,6 +207,7 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => GetAllPregnanciesUsecase(sl()));
   sl.registerLazySingleton(() => SavePregnancyUsecase(sl()));
   sl.registerLazySingleton(() => MarkPregnancyDeliveredUsecase(sl()));
+  sl.registerLazySingleton(() => RegisterBirthUsecase(sl()));
   sl.registerLazySingleton(() => DeletePregnancyUsecase(sl()));
   sl.registerFactory(
     () => PregnancyCubit(
@@ -189,6 +215,7 @@ Future<void> initDependencies() async {
       getAll: sl(),
       save: sl(),
       markDelivered: sl(),
+      registerBirthUsecase: sl(),
       deletePregnancy: sl(),
     ),
   );

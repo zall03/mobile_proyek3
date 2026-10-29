@@ -1,13 +1,17 @@
 import 'package:equatable/equatable.dart';
 
-/// Usia, trimester, dan HPL dihitung dari HPHT (Naegele, 280 hari) supaya
-/// tampilannya tidak bergantung pada jam server.
+import '../../../../core/utils/hpk.dart';
+
+/// Profil kehamilan. Usia, trimester, HPL, dan progres 1000 HPK dihitung dari
+/// HPHT supaya tampilan konsisten tanpa bergantung pada jam server.
 class Pregnancy extends Equatable {
   final String id;
   final String motherName;
   final DateTime hphtDate;
   final DateTime dueDate;
   final String status;
+  final DateTime? deliveryDate;
+  final String? notes;
 
   const Pregnancy({
     required this.id,
@@ -15,37 +19,40 @@ class Pregnancy extends Equatable {
     required this.hphtDate,
     required this.dueDate,
     this.status = 'active',
+    this.deliveryDate,
+    this.notes,
   });
 
   static const gestationDays = 280;
 
-  int get ageInDays {
-    final days = DateTime.now()
-        .difference(DateTime(hphtDate.year, hphtDate.month, hphtDate.day))
-        .inDays;
-    return days < 0 ? 0 : days;
-  }
+  int get ageInDays => gestationalDaysOf(hphtDate);
 
-  int get ageInWeeks => ageInDays ~/ 7;
+  int get ageInWeeks => gestationalWeeksOf(hphtDate);
 
-  int get trimester {
-    if (ageInWeeks <= 13) return 1;
-    if (ageInWeeks <= 27) return 2;
-    return 3;
-  }
+  int get trimester => trimesterOf(hphtDate);
 
-  int get daysRemaining {
-    final remaining = gestationDays - ageInDays;
-    return remaining < 0 ? 0 : remaining;
-  }
+  int get daysRemaining => daysUntilDueOf(hphtDate);
 
-  double get progressPercent {
-    final percent = ageInDays / gestationDays * 100;
-    return percent > 100 ? 100 : percent;
-  }
+  double get progressPercent => gestationProgressOf(hphtDate) * 100;
 
-  bool get isActive => status == 'active';
+  int get hpkDay => hpkDayOf(hphtDate);
+
+  double get hpkProgress => hpkProgressOf(hphtDate);
+
+  bool get isHpkComplete => hpkIsComplete(hphtDate);
+
+  bool get isActive => status == 'active' || status == 'hamil';
+
+  bool get isDelivered => status == 'delivered' || status == 'lahir';
 
   @override
-  List<Object?> get props => [id, motherName, hphtDate, dueDate, status];
+  List<Object?> get props => [
+    id,
+    motherName,
+    hphtDate,
+    dueDate,
+    status,
+    deliveryDate,
+    notes,
+  ];
 }
